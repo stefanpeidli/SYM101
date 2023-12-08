@@ -1,0 +1,57 @@
+"""
+Author: Stefan Peidli
+Aim: Snakemake workflow for SYMPHONY.
+Date: 06.12.2023
+Run: snakemake
+Create DAG: snakemake --forceall --dag | dot -Tpdf > snake_dag.pdf
+Create Rulegraph: snakemake --forceall --rulegraph | dot -Tpdf > snake_rulegraph.pdf
+"""
+
+import pandas as pd
+# from scripts import general_functions as utils
+from pathlib import Path
+from snakemake.utils import min_version
+
+min_version("6.4.1")  # set minimum snakemake version
+report: "report/workflow.rst"
+configfile: "../configuration/config.yaml"
+
+### PATHS ###
+TEMPDIR = Path(config['TEMPDIR'])
+DATADIR = Path(config['DATADIR'])
+
+
+rule all:
+    input:
+        'BLABLA'
+
+rule HISAT2:
+rule HISAT2_index:
+rule fastqc:
+rule multiqc:
+rule qc:
+    - alignment rate
+    - coverage
+    - gini index
+    - sample correlation
+    - missed sgrnas
+
+rule cutadapt:
+    input: "reads/{sample}.fastq.gz",
+    output:
+        fastq=temp("results/trimmed/{sample}.fastq.gz"),
+        qc="results/trimmed/{sample}.qc.txt",
+    params:
+        extra=f"-q 20 {config['adapter_length']}",
+    log: "logs/cutadapt/{sample}.log",
+    threads: 8
+    resources:
+        TODO
+    wrapper:
+        "v2.6.0/bio/cutadapt/se"
+
+
+onsuccess: 
+    print("Snakemake is done!")
+
+# https://github.com/niekwit/crispr-screens/blob/main/workflow/Snakefile
