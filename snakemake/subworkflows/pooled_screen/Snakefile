@@ -1,0 +1,112 @@
+"""
+Author: Stefan Peidli
+Aim: Snakemake workflow for SYMPHONY.
+Date: 08.12.2023
+Run: snakemake
+Create DAG: snakemake --forceall --dag | dot -Tpdf > snake_dag.pdf
+Create Rulegraph: snakemake --forceall --rulegraph | dot -Tpdf > snake_rulegraph.pdf
+"""
+
+import pandas as pd
+from pathlib import Path
+from snakemake.utils import min_version
+
+min_version("6.4.1")  # set minimum snakemake version
+report: "report/workflow.rst"
+configfile: "../configuration/config.yaml"
+
+### PATHS ###
+TEMPDIR = Path(config['TEMPDIR'])
+DATADIR = Path(config['DATADIR'])
+
+rule all:
+    input:
+        'BLABLA'
+
+### UPSTREAM ###
+
+rule cutadapt:
+    input: "reads/{sample}.fastq.gz",
+    output:
+        fastq=temp("results/trimmed/{sample}.fastq.gz"),
+        qc="results/trimmed/{sample}.qc.txt",
+    params:
+        extra=f"-q 20 {config['adapter_length']}",
+    log: "logs/cutadapt/{sample}.log",
+    threads: 8
+    resources:
+        TODO
+    wrapper:
+        "v2.6.0/bio/cutadapt/se"
+
+rule hisat2_index:
+    input:
+        fasta = "{genome}.fasta"
+    output:
+        directory("index_{genome}")
+    params:
+        prefix = "index_{genome}/"
+    log:
+        "logs/hisat2_index_{genome}.log"
+    threads: 2
+    wrapper:
+        "v3.0.4/bio/hisat2/index"
+
+rule hisat2_align:
+    input:
+        reads=["reads/{sample}_R1.fastq", "reads/{sample}_R2.fastq"],
+        idx="index/",
+    output:
+        "mapped/{sample}.bam",
+    log:
+        "logs/hisat2_align_{sample}.log",
+    params:
+        extra="",
+    threads: 2
+    wrapper:
+        "v3.0.4/bio/hisat2/align"
+
+rule fastqc:
+    input:
+        "reads/{sample}.fastq"
+    output:
+        html="qc/fastqc/{sample}.html",
+        zip="qc/fastqc/{sample}_fastqc.zip" # the suffix _fastqc.zip is necessary for multiqc to find the file. If not using multiqc, you are free to choose an arbitrary filename
+    params:
+        extra = "--quiet"
+    log:
+        "logs/fastqc/{sample}.log"
+    threads: 1
+    resources:
+        mem_mb = 1024
+    wrapper:
+        "v3.0.4/bio/fastqc"
+
+rule multiqc_dir:
+    input:
+        expand("samtools_stats/{sample}.txt", sample=["a", "b"]),
+    output:
+        "qc/multiqc.html",
+        directory("qc/multiqc_data"),
+    params:
+        extra="--data-dir",  # Optional: extra parameters for multiqc.
+    log:
+        "logs/multiqc.log",
+    wrapper:
+        "v3.0.4/bio/multiqc"
+
+rule qc:
+    - alignment rate
+    - coverage
+    - gini index
+    - sample correlations
+    - missed sgrnas
+
+### DOWNSTREAM ###
+# Counting with MAGeCK
+
+
+onsuccess: 
+    print("Snakemake is done!")
+
+# https://github.com/niekwit/crispr-screens/blob/main/workflow/Snakefile

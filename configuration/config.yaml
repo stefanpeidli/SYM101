@@ -1,3 +1,5 @@
 TEMPDIR: "/scratch/peidli/SYMPHONY/"
 DATADIR: "/home/peidli/data/SYMPHONY/"
 adapter_length: 000 #TODO: fill
+cell_lines:
+  - TODO

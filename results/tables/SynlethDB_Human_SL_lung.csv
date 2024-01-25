@@ -1,0 +1,128 @@
+gene1,gene2,cell_line,pubmed_id,source,SynlethDB_score
+KRAS,VDAC1,Human lung cancer,17568748,Synlethality,0.855
+DHX8,KRAS,"Human non-small cell lung-cancer, Lung Adenocarcin",19490893,Synlethality,0.855
+MAPK1,MYC,HMEC;adenocarcinoma;Lung cancer_D000230;D008175,22157079;21430111;21543344,GenomeRNAi;Text Mining,0.85
+EGFR,PARP1,"A549,PC3,MDA468;non-small cell lung cancer;breast cancer;breast cancer_D002289;D001943",3965078;24954871;23071597;23564760,Decipher;Text Mining,0.8336
+KRAS,USP39,"Human non-small cell lung-cancer, Lung Adenocarcin;DLD-1",19490893,Synlethality;GenomeRNAi,0.815
+CDK2,CDK6,"A549,PC3,MDA468;non-small cell lung carcinoma_D002289",3965078;20609353,Decipher;Text Mining,0.6385
+CDK2,CDK4,"A549,PC3,MDA468;non-small cell lung carcinoma_D002289",3965078;20609353,Decipher;Text Mining,0.6355
+CDK4,PARP1,"A549,PC3,MDA468;lung adenocarcinoma_C538231",3965078;23792647,Decipher;Text Mining,0.6355
+CDK4,CDK6,"A549,PC3,MDA468;non-small cell lung carcinoma_D002289",3965078;20609353,Decipher;Text Mining,0.6175
+AKT1,MAPK8,castration-resistant prostate cancer;lung cancer_D011471;D008175,23566222;23824739,Text Mining,0.56
+CASP8,MYC,adenocarcinoma;Lung cancer_D000230;D008175,21543344,Text Mining,0.56
+EGFR,HDAC9,non-small cell lung cancer_D002289,24052078,Text Mining,0.56
+TIMM8A,TP53,small-cell lung cancer_D055752,23470565,Text Mining,0.56
+EGFR,CIP2A,non-small cell lung cancer_D002289,24954871,Text Mining,0.56
+KEAP1,TXNRD1,lung cancer_D008175,23824739,Text Mining,0.56
+EGFR,FAS,EGFR-mutant lung cancers_D008175,21430781,Text Mining,0.56
+DIABLO,XIAP,adenocarcinoma;Lung cancer_D000230;D008175,21543344,Text Mining,0.56
+BCL2L11,EGFR,breast cancers;adenocarcinomas;EGFR mutant lung tumors;ALK-dependent cancers_D001943;D000230;D008171,23532334;17927446;24618813,Text Mining,0.56
+AKT1,KEAP1,lung cancer_D008175,23824739,Text Mining,0.56
+AKT1,MTOR,esophageal cancer;non-small cell lung cancer_D004938;D002289,23555162;20811722;23443316,Text Mining,0.56
+AKT1,EGFR,non-small cell lung cancer;breast cancer_D002289;D001943,24954871;20570903;23578175,Text Mining,0.56
+JUN,MAPK8,androgen-independent prostate cancer;colorectal cancer;non-small cell lung cancer;gastric cancer;cas,16287090;24847381;23500081;23566222,Text Mining,0.4868
+CASP8,CFLAR,adenocarcinoma;Lung cancer_D000230;D008175;cancer_D009369,23070002;21543344,Text Mining,0.4644
+CASP3,CASP8,lung cancer;breast cancer_D008175;D001943,18794128;24745479,Text Mining,0.4644
+BAK1,BAX,breast cancers;non-small cell lung carcinoma_D001943;D002289,23532334;21706479,Text Mining,0.4644
+CASP3,PARP1,breast cancer;Acute and chronic hypoxia;lung cancer_D001943;D000860;D008175;hepatocellular carcinoma;oral cancer;gingival cancer_D006528;D009062;D005891,23402310;20924112;23595577;21144036;22695120,Text Mining,0.4644
+BAX,BCL2,small-cell lung cancer;lung adenocarcinoma;non-small cell lung carcinoma_D055752;C538231;D002289,23470565;23792647;21706479,Text Mining,0.4305
+AKT1,TXNRD1,lung cancer_D008175,23824739,Text Mining,0.4305
+RBM5,TP53,lung cancer_D008175,20309933,Text Mining,0.4305
+MDM2,TP53,colon cancer;temperature-sensitive lung cancer;Li-Fraumeni Syndrome_D015179;D008175;D016864,18566224;16652354;18336191,Text Mining,0.4305
+NFKB1,XIAP,non-small cell lung cancer_D002289,16972754,Text Mining,0.4305
+CHEK1,MYC,lymphoma;B-cell lymphomas;leukemia;neuroblastoma;breast and lung cancers_D008223;D016393;D007938;D00,22030621;21933891;25564254,Text Mining,0.4305
+MAPK14,MAPK8,lung cancer_D008175,20615389,Text Mining,0.4305
+CASP3,CASP9,breast cancer;castration-resistant prostate cancer;non-small cell lung cancer;oral cancer;gingival c,23402310;23566222;16585163;22695120,Text Mining,0.4305
+AKT1,CIP2A,non-small cell lung cancer_D002289,24954871,Text Mining,0.304
+H2AX,TP53,breast cancer;lung adenocarcinoma;thymic lymphoma_D001943;C538231;D013953,16177181;21098704,Text Mining,0.2731
+PSMD9,TP53,small-cell lung cancer;hepatocellular carcinoma;Breast Cancer_D055752;D006528;D001943,23470565;21499307;19654313,Text Mining,0.2731
+MAPK8,PARP1,colorectal cancer;non-small cell lung cancer;gastric cancer_D015179;D002289;D013274,24847381;23500081,Text Mining,0.2731
+ATM,MYC,lymphoma;B-cell lymphomas;leukemia;neuroblastoma;breast and lung cancers_D008223;D016393;D007938;D00,22030621;21933891,Text Mining,0.2731
+JUN,PARP1,colorectal cancer;non-small cell lung cancer;gastric cancer_D015179;D002289;D013274,24847381;23500081,Text Mining,0.2731
+CASP3,CYCS,non-small cell lung cancer;lung cancer_D002289;D008175,16585163;23595577,Text Mining,0.2731
+CDC25C,CHEK2,non-small cell lung cancer_D002289,17616632;20700484,Text Mining,0.2731
+CASP3,KRAS,lung cancer_D008175,18794128,Text Mining,0.1775
+BCL2,CASP3,small-cell lung cancer;breast cancer_D055752;D001943,23470565;23402310,Text Mining,0.1775
+CIP2A,PARP1,non-small cell lung cancer_D002289,24954871,Text Mining,0.1775
+RBM45,SMAD6,non-small cell lung cancer_D002289,19047146,Text Mining,0.1775
+CIP2A,PTPA,non-small cell lung cancer_D002289,24954871,Text Mining,0.1775
+CNTNAP1,EGFR,lung adenocarcinoma_C538231,24043274,Text Mining,0.1775
+ARHGAP1,EGFR,lung adenocarcinoma_C538231,24043274,Text Mining,0.1775
+CYCS,PML,lung cancer_D008175,23595577,Text Mining,0.1775
+ARHGAP1,CNTNAP1,lung adenocarcinoma_C538231,24043274,Text Mining,0.1775
+CYCS,TWSG1,non-small cell lung cancer_D002289,16585163,Text Mining,0.1775
+CYCS,PARP1,lung cancer_D008175,23595577,Text Mining,0.1775
+CYCS,RB1,non-small cell lung cancer_D002289,16585163,Text Mining,0.1775
+CASP3,PSMD9,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+CASP3,CD34,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+BAK1,BRCA1,non-small cell lung carcinoma_D002289,21706479,Text Mining,0.1775
+CDC25C,NPRL2,non-small cell lung cancer_D002289,20700484,Text Mining,0.1775
+JUN,SMAD6,non-small cell lung cancer_D002289,19047146,Text Mining,0.1775
+JUN,RBM45,non-small cell lung cancer_D002289,19047146,Text Mining,0.1775
+JUN,MYC,colorectal cancer;non-small cell lung cancer_D015179;D002289,24847381,Text Mining,0.1775
+PARP1,PTPA,non-small cell lung cancer_D002289,24954871,Text Mining,0.1775
+PARP1,PML,lung cancer_D008175,23595577,Text Mining,0.1775
+PARP1,PCSK9,non-small cell lung cancer_D002289,23275151,Text Mining,0.1775
+CDC25C,CHEK1,non-small cell lung cancer_D002289,20700484,Text Mining,0.1775
+EGFR,PTPA,non-small cell lung cancer_D002289,24954871,Text Mining,0.1775
+CASP3,TIMM8A,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+BCL2,TIMM8A,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+BAK1,PARP1,non-small cell lung carcinoma_D002289,21706479,Text Mining,0.1775
+CASP3,CDKN1A,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+CASP3,TWSG1,non-small cell lung cancer_D002289,16585163,Text Mining,0.1775
+CASP3,PML,lung cancer_D008175,23595577,Text Mining,0.1775
+BAK1,BCL2,non-small cell lung carcinoma;hepatocellular carcinoma_D002289;D006528,21706479;21499307,Text Mining,0.1775
+CASP3,RB1,non-small cell lung cancer_D002289,16585163,Text Mining,0.1775
+BCL2,BRCA1,non-small cell lung carcinoma_D002289,21706479,Text Mining,0.1775
+CDKN1A,PSMD9,small-cell lung cancer;Breast Cancer_D055752;D001943,23470565;19654313,Text Mining,0.1775
+BCL2,CDKN1A,small-cell lung cancer;breast cancer_D055752;D001943,23470565;20334671,Text Mining,0.1775
+BAX,PARP1,non-small cell lung carcinoma_D002289,21706479,Text Mining,0.1775
+BAX,TWSG1,non-small cell lung cancer_D002289,16585163,Text Mining,0.1775
+BAX,CASP9,non-small cell lung cancer_D002289,16585163,Text Mining,0.1775
+BAX,TP53,colorectal cancer;small-cell lung cancer_D015179;D055752,16326109;23470565,Text Mining,0.1775
+BAX,CD34,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+BAX,CYCS,non-small cell lung cancer_D002289,16585163,Text Mining,0.1775
+BAX,RB1,non-small cell lung cancer_D002289,16585163,Text Mining,0.1775
+BAX,CDKN1A,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+BAX,CASP3,small-cell lung cancer;non-small cell lung cancer_D055752;D002289,23470565;16585163,Text Mining,0.1775
+BAX,CDK4,lung adenocarcinoma_C538231,23792647,Text Mining,0.1775
+BAX,PSMD9,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+BAX,BRCA1,non-small cell lung carcinoma_D002289,21706479,Text Mining,0.1775
+CENPE,MAPK3,lung cancer;neuroblastoma;pancreatic and colon carcinoma_D008175;D009447;D010190,22948716,Text Mining,0.1775
+BAX,TIMM8A,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+AKT1,PTPA,non-small cell lung cancer_D002289,24954871,Text Mining,0.1775
+AKT1,SERPINF2,non-small cell lung cancer_D002289,18644989,Text Mining,0.1775
+DIABLO,MYC,adenocarcinoma;Lung cancer_D000230;D008175,21543344,Text Mining,0.1775
+CASP9,RB1,non-small cell lung cancer_D002289,16585163,Text Mining,0.1775
+CASP9,TWSG1,non-small cell lung cancer_D002289,16585163,Text Mining,0.1775
+CASP9,CYCS,non-small cell lung cancer_D002289,16585163,Text Mining,0.1775
+MDM2,PLK4,temperature-sensitive lung cancer_D008175,16652354,Text Mining,0.1775
+MDM2,PLK1,temperature-sensitive lung cancer_D008175,16652354,Text Mining,0.1775
+CHEK2,NPRL2,non-small cell lung cancer_D002289,20700484,Text Mining,0.1775
+CREB1,CREBBP,prostate cancer;breast cancer;non-small-cell lung cancer;acute leukemia_D011471;D001943;D002289;D007,20370681,Text Mining,0.1775
+MAPK8,MYC,colorectal cancer;non-small cell lung cancer_D015179;D002289,24847381,Text Mining,0.1775
+BCL2,PSMD9,small-cell lung cancer;hepatocellular carcinoma_D055752;D006528,23470565;21499307,Text Mining,0.1775
+CD34,TP53,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+BCL2,CD34,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+PLK1,ZNF143,prostate cancer;lung cancer_D011471;D008175,20860770,Text Mining,0.1775
+PLK1,PLK4,temperature-sensitive lung cancer_D008175,16652354,Text Mining,0.1775
+CFLAR,DIABLO,adenocarcinoma;Lung cancer_D000230;D008175,21543344,Text Mining,0.1775
+CFLAR,XIAP,adenocarcinoma;Lung cancer_D000230;D008175,21543344,Text Mining,0.1775
+CFLAR,MYC,adenocarcinoma;Lung cancer_D000230;D008175,21543344,Text Mining,0.1775
+CDKN1A,TIMM8A,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+MYC,XIAP,adenocarcinoma;Lung cancer_D000230;D008175,21543344,Text Mining,0.1775
+PSMD9,TIMM8A,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+CD34,TIMM8A,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+CD34,CDKN1A,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+RB1,TWSG1,non-small cell lung cancer_D002289,16585163,Text Mining,0.1775
+CD34,PSMD9,small-cell lung cancer_D055752,23470565,Text Mining,0.1775
+PRKDC,SERPINF2,non-small cell lung cancer_D002289,18644989,Text Mining,0.1775
+RAF1,ZHX2,colorectal cancer;lung cancer_D015179;D008175,25199829,Text Mining,0.1775
+CASP8,KRAS,lung cancer_D008175,18794128,Text Mining,0.1775
+CASP8,DIABLO,adenocarcinoma;Lung cancer_D000230;D008175,21543344,Text Mining,0.1775
+CASP8,XIAP,adenocarcinoma;Lung cancer_D000230;D008175,21543344,Text Mining,0.1775
+CDC25A,CHEK2,non-small cell lung cancer_D002289,20700484,Text Mining,0.1775
+CDC25A,CHEK1,non-small cell lung cancer_D002289,20700484,Text Mining,0.1775
+CDC25A,CDC25C,non-small cell lung cancer_D002289,20700484,Text Mining,0.1775
+CDC25A,NPRL2,non-small cell lung cancer_D002289,20700484,Text Mining,0.1775
+CHEK1,NPRL2,non-small cell lung cancer_D002289,20700484,Text Mining,0.1775
