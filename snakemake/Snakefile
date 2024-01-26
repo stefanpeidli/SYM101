@@ -6,6 +6,7 @@ Run: snakemake
 Create DAG: snakemake --forceall --dag | dot -Tpdf > snake_dag.pdf
 Create Rulegraph: snakemake --forceall --rulegraph | dot -Tpdf > snake_rulegraph.pdf
 """
+# https://github.com/niekwit/crispr-screens/blob/main/workflow/Snakefile
 
 import pandas as pd
 from pathlib import Path
@@ -22,4 +23,13 @@ DATADIR = Path(config['DATADIR'])
 onsuccess: 
     print("Snakemake is done!")
 
-# https://github.com/niekwit/crispr-screens/blob/main/workflow/Snakefile
+### SUBWORKFLOWS / MODULES ###
+module pooled_screen:
+    snakefile: "subworkflows/pooled_screen/Snakefile"
+    config: config
+use rule * from pooled_screen as pooled_screen_* 
+
+### TARGET FILES ###
+rule all:
+    input:
+        rules.pooled_screen_all.input

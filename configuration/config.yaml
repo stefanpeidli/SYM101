@@ -3,3 +3,9 @@ DATADIR: "/home/peidli/data/SYMPHONY/"
 adapter_length: 000 #TODO: fill
 cell_lines:
   - TODO
+basespace_project_ids:
+  Symphony: 402672358
+  Unindexed Reads: 402688291
+  Symphony_Repeat: 403174211
+  Cas13_screens_1: 408146834
+basespace_run_id: 274149887
