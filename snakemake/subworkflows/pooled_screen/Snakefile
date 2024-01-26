@@ -15,27 +15,28 @@ min_version("6.4.1")  # set minimum snakemake version
 report: "report/workflow.rst"
 configfile: "../configuration/config.yaml"
 
-### PATHS ###
+### PATHS and Names ###
 TEMPDIR = Path(config['TEMPDIR'])
 DATADIR = Path(config['DATADIR'])
+sample_names = list(pd.read_csv('../resources/pooled_screen_1_fastqs.txt', sep='\t', index_col=0).index)
 
 rule all:
     input:
-        TEMPDIR / 'pooled_screen_1/fastq/'
+        "../results/multiqc.html",
+        #expand(TEMPDIR / 'pooled_screen_1/fastq/{sample}_L00{i}_R1_001.fastq', sample=sample_names, i=[1,2])
 
 ### UPSTREAM ###
-
 rule download_fastq_bs:
     output:
-        directory(TEMPDIR / 'pooled_screen_1/fastq/')
+        expand(TEMPDIR / 'pooled_screen_1/fastq/{sample}_L00{i}_R1_001.fastq', sample=sample_names, i=[1,2])
     resources:
         time='12:00:00',
         mem_mb=64000,
         disk_mb=64000,
     shell:
         """
-        bs download appsession -v --id=715537995 --extension=fastq.gz -o {output}
-        cd {output}
+        bs download appsession -v --id=715537995 --extension=fastq.gz -o {TEMPDIR}/pooled_screen_1/fastq/
+        cd {TEMPDIR}/pooled_screen_1/fastq/
         # fastq files seem redundantly available in the subfolders
         rm -r *_L00*_ds.*
         # move all fastq files to main folder
@@ -45,6 +46,35 @@ rule download_fastq_bs:
         # unzip
         gunzip *.gz
         """
+
+rule fastqc:
+    input:
+        TEMPDIR / 'pooled_screen_1/fastq/{sample}_L00{i}_R1_001.fastq'
+    output:
+        html=TEMPDIR / "pooled_screen_1/fastqc/{sample}_L00{i}.html",
+        zip=TEMPDIR / "pooled_screen_1/fastqc/{sample}_L00{i}_fastqc.zip" # the suffix _fastqc.zip is necessary for multiqc to find the file. If not using multiqc, you are free to choose an arbitrary filename
+    params:
+        extra = "--quiet"
+    log:
+        "logs/fastqc/{sample}_{i}.log"
+    threads: 4
+    resources:
+        mem_mb = 1024
+    wrapper:
+        "v3.3.5/bio/fastqc"
+
+rule multiqc_dir:
+    input:
+        expand(TEMPDIR / "pooled_screen_1/fastqc/{sample}_L00{i}.html", sample=sample_names, i=[1,2]),
+    output:
+        "../results/multiqc.html",
+        directory("../results/multiqc_data"),
+    params:
+        extra="--data-dir",  # Optional: extra parameters for multiqc.
+    log:
+        "logs/multiqc.log",
+    wrapper:
+        "v3.3.5/bio/multiqc"
 
 # could just use trim_galore instead of cutadapt and fastqc...
 # rule cutadapt:
