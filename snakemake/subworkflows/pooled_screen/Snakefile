@@ -235,6 +235,10 @@ rule merge_counts:
         df.columns = df.columns.droplevel(1)
         df.index.name = 'unique_guide_name'
         df = df.fillna(0)  # fill nans with zeros
+        # collapse lanes
+        df = df.T
+        df['sample_name'] = [x.split('_S')[0] for x in df.index]  # remove sample number by Illumina and lane
+        df = df.groupby('sample_name').sum().T
         for c in df.columns: df[c] = df[c].astype('int64')  # make integer
         df = pd.merge(guide_df, df, how='right', left_index=True, right_index=True)  # add guide info
         df.to_csv(output[0])
