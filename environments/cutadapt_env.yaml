@@ -1,0 +1,8 @@
+name: cutadapt_env
+
+channels:
+ - bioconda
+ - defaults
+
+dependencies:
+  - bioconda::cutadapt

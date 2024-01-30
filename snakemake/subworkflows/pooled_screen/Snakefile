@@ -19,11 +19,15 @@ configfile: "../configuration/config.yaml"
 TEMPDIR = Path(config['TEMPDIR'])
 DATADIR = Path(config['DATADIR'])
 sample_names = list(pd.read_csv('../resources/pooled_screen_1_fastqs.txt', sep='\t', index_col=0).index)
+sample_names = [x for x in sample_names if 'Undetermined_S0' not in x]
 
 rule all:
     input:
+        # QC
         "../results/multiqc.html",
-        #expand(TEMPDIR / 'pooled_screen_1/fastq/{sample}_L00{i}_R1_001.fastq', sample=sample_names, i=[1,2])
+        "../results/tables/trimmed_summary.csv",
+        # Counts
+        TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv',
 
 ### UPSTREAM ###
 rule download_fastq_bs:
@@ -55,8 +59,6 @@ rule fastqc:
         zip=TEMPDIR / "pooled_screen_1/fastqc/{sample}_L00{i}_fastqc.zip" # the suffix _fastqc.zip is necessary for multiqc to find the file. If not using multiqc, you are free to choose an arbitrary filename
     params:
         extra = "--quiet"
-    log:
-        "logs/fastqc/{sample}_{i}.log"
     threads: 4
     resources:
         mem_mb = 1024
@@ -76,90 +78,170 @@ rule multiqc_dir:
     wrapper:
         "v3.3.5/bio/multiqc"
 
-# could just use trim_galore instead of cutadapt and fastqc...
-# rule cutadapt:
-#     input: "reads/{sample}.fastq.gz",
-#     output:
-#         fastq=temp("results/trimmed/{sample}.fastq.gz"),
-#         qc="results/trimmed/{sample}.qc.txt",
-#     params:
-#         extra=f"-q 20 {config['adapter_length']}",
-#     log: "logs/cutadapt/{sample}.log",
-#     threads: 8
-#     resources:
-#         TODO
-#     wrapper:
-#         "v2.6.0/bio/cutadapt/se"
+rule cutadapt_single_end:
+    input:
+        TEMPDIR / 'pooled_screen_1/fastq/{sample}_L00{i}_R1_001.fastq'
+    output:
+        fastq=TEMPDIR / 'pooled_screen_1/trimmed/{sample}_L00{i}_R1_001.fastq',
+        qc=TEMPDIR / 'pooled_screen_1/trimmed/qc/{sample}_L00{i}_R1_001.qc.txt',
+    params:
+        primer_seq=config['primer_seq']
+    threads: 8
+    conda: "cutadapt_env" #  "../environments/cutadapt_env.yaml"
+    shell:
+        """
+        cutadapt --cores {threads} \
+            -g {params.primer_seq}  \
+            -o {output.fastq} {input} > {output.qc} 
+        """
 
-# /home/peidli/utils/genomes/homo_sapiens/
-# rule hisat2_index:
-#     input:
-#         fasta = "{genome}.fasta"
-#     output:
-#         directory("index_{genome}")
-#     params:
-#         prefix = "index_{genome}/"
-#     log:
-#         "logs/hisat2_index_{genome}.log"
-#     threads: 2
-#     wrapper:
-#         "v3.0.4/bio/hisat2/index"
+rule custom_trimming:
+    input:
+        TEMPDIR / 'pooled_screen_1/fastq/{sample}_L00{i}_R1_001.fastq'
+    output:
+        fastq=TEMPDIR / 'pooled_screen_1/trimmed/{sample}_L00{i}_R1_001_custom_trimmed.fastq',
+        qc=TEMPDIR / 'pooled_screen_1/trimmed/qc/{sample}_L00{i}_R1_001_custom_trimmed_qc.csv'
+    params:
+        primer_seq=config['primer_seq'],
+        pmin=config['primer_range']['min'],
+        pmax=config['primer_range']['max'],
+        guide_length=config['guide_length']
+    resources:
+        mem_mb=16000,
+        disk_mb=16000,
+        time='12:00:00',
+    threads: 8
+    shell:
+        """
+        python scripts/variable_trimming.py -i {input} -o {output.fastq} \
+            -q {output.qc} \
+            -p {params.primer_seq} \
+            -g {params.guide_length}  \
+            -r {params.pmin},{params.pmax} \
+            -t {threads}
+        """
 
-# rule hisat2_align:
-#     input:
-#         reads=["reads/{sample}_R1.fastq", "reads/{sample}_R2.fastq"],
-#         idx="index/",
-#     output:
-#         "mapped/{sample}.bam",
-#     log:
-#         "logs/hisat2_align_{sample}.log",
-#     params:
-#         extra="",
-#     threads: 2
-#     wrapper:
-#         "v3.0.4/bio/hisat2/align"
+rule custom_trimming_summary:
+    input:
+        expand(TEMPDIR / 'pooled_screen_1/trimmed/qc/{sample}_L00{i}_R1_001_custom_trimmed_qc.csv', sample=sample_names, i=[1,2])
+    output:
+        table="../results/tables/trimmed_summary.csv",
+        fig1="../results/figures/trimmed_summary_scatter.pdf",
+        fig2="../results/figures/trimmed_summary_violing.pdf"
+    run:
+        import seaborn as sns
+        import matplotlib.ticker as mtick
+        import matplotlib.pyplot as pl
 
-# rule fastqc:
-#     input:
-#         "reads/{sample}.fastq"
-#     output:
-#         html="qc/fastqc/{sample}.html",
-#         zip="qc/fastqc/{sample}_fastqc.zip" # the suffix _fastqc.zip is necessary for multiqc to find the file. If not using multiqc, you are free to choose an arbitrary filename
-#     params:
-#         extra = "--quiet"
-#     log:
-#         "logs/fastqc/{sample}.log"
-#     threads: 1
-#     resources:
-#         mem_mb = 1024
-#     wrapper:
-#         "v3.0.4/bio/fastqc"
+        path = Path(config['TEMPDIR']) /'pooled_screen_1/trimmed/qc'
+        qcs = {x.name.split('_R1_001')[0]: pd.read_csv(x, sep='\t') for x in path.glob('*_custom_trimmed_qc.csv')}
+        df = pd.concat(qcs).droplevel(1)
+        df['fraction_filtered'] = df.Filtered_reads / df.Total_reads
+        df['group'] = [x.split('-')[1] for x in df.index]
+        df['lane'] = [x.split('_')[-1] for x in df.index]
+        df.to_csv(output.table)
 
-# rule multiqc_dir:
-#     input:
-#         expand("samtools_stats/{sample}.txt", sample=["a", "b"]),
-#     output:
-#         "qc/multiqc.html",
-#         directory("qc/multiqc_data"),
-#     params:
-#         extra="--data-dir",  # Optional: extra parameters for multiqc.
-#     log:
-#         "logs/multiqc.log",
-#     wrapper:
-#         "v3.0.4/bio/multiqc"
+        with sns.axes_style('whitegrid'):
+            fig, ax = pl.subplots()
+        sns.scatterplot(data=df, x='Mean_primer_distance', hue='group', y='Mean_primer_certainty', ax=ax)
+        pl.xlabel('Mean weighted hamming distance to primer sequence')
+        pl.ylabel('Distance to second best hit')
+        pl.title('Primer Detection Metrics across FASTQ files')
+        pl.savefig(output.fig1, dpi=300)
+        pl.close()
 
-# rule qc:
-#     - alignment rate
-#     - coverage
-#     - gini index
-#     - sample correlations
-#     - missed sgrnas
+        with sns.axes_style('whitegrid'):
+            fig, ax = pl.subplots()
+        sns.violinplot(data=df, x='group', hue='lane', y='fraction_filtered', ax=ax, order=['01', '02', '03', 'pool'])
+        ax.yaxis.set_major_formatter(mtick.PercentFormatter(1,1))
+        pl.ylabel('Percent Reads Filtered')
+        pl.xlabel('Library Group')
+        pl.title('Fraction of Reads Removed during Trim')
+        pl.savefig(output.fig2, dpi=300)
+        pl.close()
+
+rule guide_to_fasta:
+    input:
+        '../resources/all_gRNA_data.csv'
+    output:
+        '../resources/pooled_screen_1_guides.fa'
+    run:
+        from tqdm.auto import tqdm
+        guide_df = pd.read_csv(input[0], index_col='unique_guide_name')
+        print('Converting to FASTA!')
+        with open(output[0], 'w') as OUTPUT:
+            for index, row in tqdm(guide_df.iterrows()):
+                OUTPUT.write(f'>{index}\n')
+                OUTPUT.write(f'{row.GuideSeq}\n')
+        print('Done!')
+
+rule hisat2_guide_index:
+    input:
+        '../resources/pooled_screen_1_guides.fa'
+    output:
+        expand(TEMPDIR / 'pooled_screen_1/hisat2/index.{i}.ht2', i=range(1,9))
+    threads: 8
+    conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
+    shell:
+        """
+        hisat2-build -p {threads} {input} {output}
+        """
+
+rule hisat2_align:
+    input:
+        trimmed_fastq=TEMPDIR / 'pooled_screen_1/trimmed/{sample}_L00{i}_R1_001_custom_trimmed.fastq',
+        index=expand(TEMPDIR / 'pooled_screen_1/hisat2/index.{i}.ht2', i=range(1,9))
+    output:
+        sam=TEMPDIR / 'pooled_screen_1/hisat2/{sample}_L00{i}_R1_001_custom_trimmed.sam'
+    resources:
+        time='04:00:00',
+        mem_mb=32000,
+        disk_mb=32000
+    threads: 8
+    conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
+    shell:
+        """
+        hisat2 \
+        -x {TEMPDIR}/pooled_screen_1/hisat2/index \
+        -U {input.trimmed_fastq} \
+        -S {output.sam} \
+        -p {threads}
+        """
+
+rule count:
+    input:
+        sam=TEMPDIR / 'pooled_screen_1/hisat2/{sample}_L00{i}_R1_001_custom_trimmed.sam'
+    output:
+        counts=TEMPDIR / 'pooled_screen_1/counts/{sample}_L00{i}_counts.txt'
+    resources:
+        time='01:00:00',
+        mem_mb=16000,
+        disk_mb=16000
+    threads: 4
+    conda: "samtools_env"  # "../environments/samtools_env.yaml"
+    script:
+        "../../scripts/count_reads.sh"
+
+rule merge_counts:
+    input:
+        counts=expand(TEMPDIR / 'pooled_screen_1/counts/{sample}_L00{i}_counts.txt', sample=sample_names, i=[1,2]),
+        guide_df='../resources/all_gRNA_data.csv'
+    output:
+        TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv'
+    run:
+        guide_df = pd.read_csv(input.guide_df, index_col='unique_guide_name')
+        counts = {Path(x).name.split('_counts')[0]: pd.read_csv(x, sep='\t', header=None, index_col=0) for x in input.counts}
+        df = pd.concat(counts, axis=1)
+        df.columns = df.columns.droplevel(1)
+        df.index.name = 'unique_guide_name'
+        df = df.fillna(0)  # fill nans with zeros
+        for c in df.columns: df[c] = df[c].astype('int64')  # make integer
+        df = pd.merge(guide_df, df, how='right', left_index=True, right_index=True)  # add guide info
+        df.to_csv(output[0])
 
 ### DOWNSTREAM ###
-# Counting with MAGeCK
+# TODO
 
 
 onsuccess: 
     print("Snakemake is done!")
-
-# https://github.com/niekwit/crispr-screens/blob/main/workflow/Snakefile

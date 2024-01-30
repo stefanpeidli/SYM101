@@ -1,6 +1,10 @@
 TEMPDIR: "/scratch/peidli/SYMPHONY/"
 DATADIR: "/home/peidli/data/SYMPHONY/"
-adapter_length: 000 #TODO: fill
+guide_length: 23
+primer_seq: ACCCCTACCAACTGGTCGGGGTTTGAAAC  # sequence left of gRNA
+primer_range:
+  min: 28
+  max: 34
 cell_lines:
   - TODO
 basespace_project_ids:
