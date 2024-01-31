@@ -20,14 +20,17 @@ TEMPDIR = Path(config['TEMPDIR'])
 DATADIR = Path(config['DATADIR'])
 sample_names = list(pd.read_csv('../resources/pooled_screen_1_fastqs.txt', sep='\t', index_col=0).index)
 sample_names = [x for x in sample_names if 'Undetermined_S0' not in x]
+guide_df = pd.read_csv('../resources/all_gRNA_data.csv', index_col='unique_guide_name')
 
 rule all:
     input:
         # QC
-        "../results/multiqc.html",
+        "../results/multiqc/multiqc.html",
         "../results/tables/trimmed_summary.csv",
         # Counts
         TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv',
+        # Analysis
+        '../results/mageck/pooled_screen_1_mageck.sgrna_summary.txt'
 
 ### UPSTREAM ###
 rule download_fastq_bs:
@@ -69,8 +72,8 @@ rule multiqc_dir:
     input:
         expand(TEMPDIR / "pooled_screen_1/fastqc/{sample}_L00{i}.html", sample=sample_names, i=[1,2]),
     output:
-        "../results/multiqc.html",
-        directory("../results/multiqc_data"),
+        "../results/multiqc/multiqc.html",
+        directory("../results/multiqc/multiqc_data"),
     params:
         extra="--data-dir",  # Optional: extra parameters for multiqc.
     log:
@@ -242,6 +245,57 @@ rule merge_counts:
         for c in df.columns: df[c] = df[c].astype('int64')  # make integer
         df = pd.merge(guide_df, df, how='right', left_index=True, right_index=True)  # add guide info
         df.to_csv(output[0])
+
+rule mageck_prepare_inputs:
+    input:
+        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv'
+    output:
+        counts=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_counts.tsv',
+        control=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_control_guides.txt',
+        day0=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_TP1_samples.txt',
+        # treated=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_TP6_samples.txt'
+    run:
+        df = pd.read_csv(input.counts, index_col=0)
+        # needs counts as a tsv in a very specific format
+        df.index.name = 'sgRNA'
+        df.drop(['Transcript_ID', 'ensembl_gene_id', 'transcript_biotype',
+            'GuideName', 'GuideSeq', 'MatchPos', 'Guide_Score', 'Region',
+            'transcript_length', 'gRNA_occurence', 'transcript_per_gene'], axis=1, inplace=True)
+        df.rename(dict(Gene='gene'), axis=1, inplace=True)
+        df.to_csv(output.counts, sep='\t')
+        # needs control guide names as a file
+        with open(output.control, 'w') as file:
+            file.write('\n'.join([x for x in df.index if 'control' in x.lower()]))
+        # Initial timepoint TP1 is "Day0"
+        day0 = ','.join([x for x in df.columns if 'TP1' in x])
+        with open(output.day0, 'w') as file:
+            file.write(day0)
+        # # Final timepoint TP6 only (for now) is "Treatment"
+        # treated = ','.join([x for x in df.columns if 'TP6' in x])
+        # with open(output[2], 'w') as file:
+        #     file.write(treated)
+
+rule mageck:
+    input:
+        counts=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_counts.tsv',
+        control=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_control_guides.txt',
+        day0=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_TP1_samples.txt',
+    output:
+        '../results/mageck/pooled_screen_1_mageck.sgrna_summary.txt'
+    conda: "mageck_env"  # "../environments/mageck_env.yaml"
+    shell:
+        """
+        mkdir -p $(dirname {output})
+        mageck test \
+        --count-table {input.counts} \
+        --control-sgrna {input.control} \
+        --day0-label $(cat {input.day0}) \
+        --output-prefix ../results/mageck/pooled_screen_1_mageck \
+        --norm-method control \
+        --pdf-report \
+        --sort-criteria neg \
+        --adjust-method fdr
+        """
 
 ### DOWNSTREAM ###
 # TODO

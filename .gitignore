@@ -3,6 +3,8 @@
 stringdb_ppi.tsv.gz
 .snakemake
 logs
+*.gene_summary.txt
+*.sgrna_summary.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

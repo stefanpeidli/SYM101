@@ -1,0 +1,10 @@
+name: mageck_env
+
+channels:
+ - bioconda
+ - conda-forge
+ - defaults
+
+dependencies:
+  - bioconda::mageck
+  - conda-forge::pandas
