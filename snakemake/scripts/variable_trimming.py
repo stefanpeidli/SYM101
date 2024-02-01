@@ -49,6 +49,30 @@ def make_substrings(s, K):
     return [s[i: j] for i in range(len(s)) for j in range(i + 1, len(s) + 1) if len(s[i:j]) == K]
 
 def trim_sequence(read, quality):
+    """Trim sequence to region behind primer and return trimmed sequence and quality.
+    
+    Parameters
+    ----------
+    read : str
+        Read sequence
+    quality : str
+        Read quality
+    
+    Returns
+    -------
+    trimmed_seq : str
+        Trimmed sequence
+    trimmed_qual : str
+        Trimmed quality
+    primer_idx : int
+        Index of primer start
+    primer_hit : str
+        Primer sequence
+    primer_distance : float
+        Hamming distance between primer and primer_hit
+    primer_certainty : float
+        Difference between first and second best primer hit primer_distance
+    """
     K = len(seq_primer)
     
     # search primer in expected region
@@ -72,7 +96,7 @@ def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
 ### parallel processing ###
-def process(line1, line2, line3, line4):
+def process(line1, line2, line4):
     index = line1
     sequence = line2.replace('\n', '')
     qual = line4.replace('\n', '')
@@ -85,13 +109,14 @@ with open(input_file, 'r') as INPUT:
     lines = INPUT.readlines()
     n_reads = int(len(lines) / 4)
     print('Trimming reads...')
-    results = Parallel(n_jobs=threads)(delayed(process)(line1, line2, line3, line4) for line1, line2, line3, line4 in tqdm(chunker(lines, size=4), total=n_reads))
+    results = Parallel(n_jobs=threads)(delayed(process)(line1, line2, line4) for line1, line2, line3, line4 in tqdm(chunker(lines, size=4), total=n_reads))
 
-# write to file
+# write to file (both trimmed fastq and QC log)
 print('Writing to file...')
 Path(output_file).parent.mkdir(parents=True, exist_ok=True)
 Path(qc_file).parent.mkdir(parents=True, exist_ok=True)
 with open(output_file, mode='w') as OUTPUT, open(qc_file, 'w') as QC:
+    # Track QC metrics
     primer_distance_sum = 0
     primer_certainty_sum = 0
     n_removed = 0
@@ -99,8 +124,10 @@ with open(output_file, mode='w') as OUTPUT, open(qc_file, 'w') as QC:
         primer_certainty_sum += primer_certainty
         primer_distance_sum += primer_distance
         if (primer_distance > 0.3) or (primer_certainty < 0.25):
+            # skip read if primer is not found or too close to second best primer
             n_removed += 1
             continue
+        # write trimmed read to file
         OUTPUT.write(index)
         OUTPUT.write(trimmed_seq+'\n')
         OUTPUT.write('+\n')

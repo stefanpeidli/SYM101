@@ -68,9 +68,10 @@ rule fastqc:
     wrapper:
         "v3.3.5/bio/fastqc"
 
-rule multiqc_dir:
+rule multiqc:
     input:
-        expand(TEMPDIR / "pooled_screen_1/fastqc/{sample}_L00{i}.html", sample=sample_names, i=[1,2]),
+        fastqc=expand(TEMPDIR / "pooled_screen_1/fastqc/{sample}_L00{i}.html", sample=sample_names, i=[1,2]),
+        samtools=expand(TEMPDIR / "pooled_screen_1/hisat2/{sample}_L00{i}_R1_001_custom_trimmed_stats.txt", sample=sample_names, i=[1,2]),
     output:
         "../results/multiqc/multiqc.html",
         directory("../results/multiqc/multiqc_data"),
@@ -140,22 +141,24 @@ rule custom_trimming_summary:
         qcs = {x.name.split('_R1_001')[0]: pd.read_csv(x, sep='\t') for x in path.glob('*_custom_trimmed_qc.csv')}
         df = pd.concat(qcs).droplevel(1)
         df['fraction_filtered'] = df.Filtered_reads / df.Total_reads
-        df['group'] = [x.split('-')[1] for x in df.index]
+        df['cell_line'] = [x.split('-')[1] for x in df.index]
         df['lane'] = [x.split('_')[-1] for x in df.index]
+        df['replicate'] = [x.split('-')[2] if 'pool' not in x else '0'+x[-5] for x in df.index ]
+        df['time_point'] = [x.split('-')[3][:3] if 'pool' not in x else 'Pool' for x in df.index ]
         df.to_csv(output.table)
 
         with sns.axes_style('whitegrid'):
             fig, ax = pl.subplots()
-        sns.scatterplot(data=df, x='Mean_primer_distance', hue='group', y='Mean_primer_certainty', ax=ax)
+        sns.scatterplot(data=df, y='Mean_primer_distance', hue='cell_line', x='Mean_primer_certainty', ax=ax)
         pl.xlabel('Mean weighted hamming distance to primer sequence')
         pl.ylabel('Distance to second best hit')
-        pl.title('Primer Detection Metrics across FASTQ files')
+        pl.title('Primer Detection Metrics across FASTQ files\n(still including filtered reads)')
         pl.savefig(output.fig1, dpi=300)
         pl.close()
 
         with sns.axes_style('whitegrid'):
             fig, ax = pl.subplots()
-        sns.violinplot(data=df, x='group', hue='lane', y='fraction_filtered', ax=ax, order=['01', '02', '03', 'pool'])
+        sns.violinplot(data=df, x='cell_line', hue='lane', y='fraction_filtered', ax=ax, order=['01', '02', '03', 'pool'])
         ax.yaxis.set_major_formatter(mtick.PercentFormatter(1,1))
         pl.ylabel('Percent Reads Filtered')
         pl.xlabel('Library Group')
@@ -209,6 +212,22 @@ rule hisat2_align:
         -U {input.trimmed_fastq} \
         -S {output.sam} \
         -p {threads}
+        """
+
+rule samtools_stats:
+    input:
+        sam=TEMPDIR / 'pooled_screen_1/hisat2/{sample}_L00{i}_R1_001_custom_trimmed.sam'
+    output:
+        stats=TEMPDIR / 'pooled_screen_1/hisat2/{sample}_L00{i}_R1_001_custom_trimmed_stats.txt'
+    resources:
+        time='01:00:00',
+        mem_mb=16000,
+        disk_mb=16000
+    threads: 8
+    conda: "samtools_env"  # "../environments/samtools_env.yaml"
+    shell:
+        """
+        samtools stats -@ {threads} {input.sam} > {output.stats}
         """
 
 rule count:
@@ -277,6 +296,7 @@ rule mageck_prepare_inputs:
 
 rule mageck:
     input:
+    # I should run this per cell line I guess
         counts=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_counts.tsv',
         control=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_control_guides.txt',
         day0=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_TP1_samples.txt',
@@ -296,6 +316,8 @@ rule mageck:
         --sort-criteria neg \
         --adjust-method fdr
         """
+
+rule bagel2:
 
 ### DOWNSTREAM ###
 # TODO
