@@ -13,3 +13,4 @@ dependencies:
   - conda-forge::r-optparse
   - conda-forge::jupyter
   - bioconda::bioconductor-gscreend
+  - bioconda::bioconductor-summarizedexperiment

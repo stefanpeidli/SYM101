@@ -5,6 +5,10 @@ Date: 08.12.2023
 Run: snakemake
 Create DAG: snakemake --forceall --dag | dot -Tpdf > snake_dag.pdf
 Create Rulegraph: snakemake --forceall --rulegraph | dot -Tpdf > snake_rulegraph.pdf
+TASKS:
+- Fix missing guides aligned
+- Annotate exon number
+- Genomic position analysis
 """
 
 import pandas as pd
@@ -438,6 +442,10 @@ rule align_guides_to_genome_hisat2:
 rule hisat2_index_transcriptome:
     output:
         expand(TEMPDIR / 'pooled_screen_1/hisat2/gencode.v45.transcripts.{i}.ht2', i=range(1,9))
+    resources:
+        time='24:00:00',
+        mem_mb=16000,
+        disk_mb=16000
     threads: 8
     conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
     shell:
@@ -445,7 +453,7 @@ rule hisat2_index_transcriptome:
         cd {TEMPDIR}/pooled_screen_1/hisat2/
         wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_45/gencode.v45.transcripts.fa.gz
         gunzip gencode.v45.transcripts.fa.gz
-        hisat2-build -p {threads} gencode.v45.transcripts.fa {output}
+        hisat2-build -p {threads} gencode.v45.transcripts.fa {TEMPDIR}/pooled_screen_1/hisat2/gencode.v45.transcripts
         """
 
 rule align_guides_to_transcriptome_hisat2:
@@ -463,7 +471,7 @@ rule align_guides_to_transcriptome_hisat2:
     shell:
         """
         hisat2 -f \
-        -x $(dirname {input.index})/gencode.v45.transcripts \
+        -x {TEMPDIR}/pooled_screen_1/hisat2/gencode.v45.transcripts \
         -U {input.guide_fasta} \
         -S {output.sam} \
         -p {threads}
