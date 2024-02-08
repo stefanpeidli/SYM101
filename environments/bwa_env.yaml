@@ -1,0 +1,8 @@
+name: hisat2_env
+
+channels:
+ - bioconda
+ - defaults
+
+dependencies:
+  - bioconda::bwa

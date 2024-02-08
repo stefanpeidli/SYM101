@@ -1,0 +1,16 @@
+name: offtarget_env
+
+channels:
+ - conda-forge
+ - bioconda
+ - defaults
+
+dependencies:
+  - python>=3
+  - numpy
+  - matplotlib
+  - pandas
+  - bioconda::cas-offinder
+  - conda-forge::scikit-learn
+  - pip:
+     - xgboost==1.7.3

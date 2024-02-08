@@ -21,6 +21,7 @@ DATADIR = Path(config['DATADIR'])
 sample_names = list(pd.read_csv('../resources/pooled_screen_1_fastqs.txt', sep='\t', index_col=0).index)
 sample_names = [x for x in sample_names if 'Undetermined_S0' not in x]
 guide_df = pd.read_csv('../resources/all_gRNA_data.csv', index_col='unique_guide_name')
+ROOT = Path("../../../")
 
 rule all:
     input:
@@ -30,7 +31,13 @@ rule all:
         # Counts
         TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv',
         # Analysis
-        '../results/mageck/pooled_screen_1_mageck.sgrna_summary.txt'
+        '../results/mageck/pooled_screen_1_mageck.sgrna_summary.txt',
+        expand('../results/tables/pooled_screen_1_bagel_pr_{feature}.tsv', feature=['gene']), # 'transcript' not working, maybe due to training sets
+        # Target alignment
+        TEMPDIR / 'pooled_screen_1/bwa/pooled_screen_1_guides_to_genome.sam',
+        TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_transcriptome.sam',
+        TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_genome.sam',
+        # "../results/tables/cas_off_finder.txt"
 
 ### UPSTREAM ###
 rule download_fastq_bs:
@@ -265,6 +272,7 @@ rule merge_counts:
         df = pd.merge(guide_df, df, how='right', left_index=True, right_index=True)  # add guide info
         df.to_csv(output[0])
 
+### DOWNSTREAM ###
 rule mageck_prepare_inputs:
     input:
         counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv'
@@ -317,11 +325,179 @@ rule mageck:
         --adjust-method fdr
         """
 
-rule bagel2:
+rule bagel2_prepare:
+    input:
+        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv'
+    output:
+        bagel_counts_gene=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel2_input_gene.txt',
+        bagel_counts_transcript=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel2_input_transcript.txt'
+    run:
+        df = pd.read_csv(input.counts, index_col=0)
+        df.index.name = 'sgRNA'
+        # Set gene as target feature
+        sdf = df.drop(['Transcript_ID', 'ensembl_gene_id', 'transcript_biotype',
+            'GuideName', 'GuideSeq', 'MatchPos', 'Guide_Score', 'Region',
+            'transcript_length', 'gRNA_occurence', 'transcript_per_gene'], axis=1)
+        sdf.to_csv(output.bagel_counts_gene, sep='\t')
+        # Set non-unique transcripts as target feature
+        # Some transcript have only single guide --> remove them
+        sdf = df.drop(['ensembl_gene_id', 'Gene', 'transcript_biotype',
+            'GuideName', 'GuideSeq', 'MatchPos', 'Guide_Score', 'Region',
+            'transcript_length', 'gRNA_occurence', 'transcript_per_gene'], axis=1)
+        cts = sdf.value_counts('Transcript_ID')
+        nonunique_IDs = cts[cts > 1].index
+        sdf = sdf[sdf.Transcript_ID.isin(nonunique_IDs)]
+        sdf.to_csv(output.bagel_counts_transcript, sep='\t')
 
-### DOWNSTREAM ###
-# TODO
+rule bagel2_fc:
+    input:
+        bagel_py="/home/peidli/utils/bagel/BAGEL.py", # clone with github
+        bagel_counts=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel2_input_{feature}.txt'
+    output:
+        fc=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel_{feature}.foldchange',
+        norm=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel_{feature}.normed_readcount'
+    shell:
+        """
+        # Calculate Fold Changes
+        {input.bagel_py} fc -i {input.bagel_counts} \
+            -o {TEMPDIR}/pooled_screen_1/bagel2/pooled_screen_1_bagel_{wildcards.feature} \
+            -c 1,2,3
+        """
 
+rule bagel2_bf:
+    input:
+        bagel_py="/home/peidli/utils/bagel/BAGEL.py",
+        fc=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel_{feature}.foldchange',
+        bagel_folder="/home/peidli/utils/bagel/",
+    output:
+        bf='../results/tables/pooled_screen_1_bagel_bf_{feature}.tsv'
+    shell:
+        """
+        # Calculate Bayes Factors
+        {input.bagel_py} bf -i {input.fc} \
+            -o {output.bf} \
+            -e {input.bagel_folder}/CEGv2.txt \
+            -n {input.bagel_folder}/NEGv1.txt \
+            -c 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53
+        """# columns 1-53 are the timepoints (56 samples - 3 pools)
+        #TODO: Question: Do I have to change the training sets???
+
+rule bagel2_pr:
+    input:
+        bagel_py="/home/peidli/utils/bagel/BAGEL.py",
+        bf='../results/tables/pooled_screen_1_bagel_bf_{feature}.tsv',
+        bagel_folder="/home/peidli/utils/bagel/",
+    output:
+        pr='../results/tables/pooled_screen_1_bagel_pr_{feature}.tsv'
+    shell:
+        """
+        # Calculate Precision-Recall
+        {input.bagel_py} pr -i {input.bf} \
+            -o {output.pr} \
+            -e {input.bagel_folder}/CEGv2.txt \
+            -n {input.bagel_folder}/NEGv1.txt
+        """
+
+rule cas_off_finder:
+    input:
+        "../resources/guide_list_casoffinder.txt"
+    output:
+        "../results/tables/cas_off_finder.txt"
+    resources:
+        time='24:00:00',
+        mem_mb=64000,
+        disk_mb=64000
+    conda:
+        "offtarget_env"
+    shell:
+        """
+        cas-offinder {input} C {output}
+        """
+
+rule align_guides_to_genome_hisat2:
+    input:
+        guide_fasta='../resources/pooled_screen_1_guides.fa',
+        index="/g/huber/users/peidli/utils/genomes/homo_sapiens/grch38"
+    output:
+        sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_genome.sam'
+    resources:
+        time='24:00:00',
+        mem_mb=64000,
+        disk_mb=64000
+    threads: 8
+    conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
+    shell:
+        """
+        hisat2 -f \
+        -x {input.index}/genome \
+        -U {input.guide_fasta} \
+        -S {output.sam} \
+        -p {threads}
+        """
+
+rule hisat2_index_transcriptome:
+    output:
+        expand(TEMPDIR / 'pooled_screen_1/hisat2/gencode.v45.transcripts.{i}.ht2', i=range(1,9))
+    threads: 8
+    conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
+    shell:
+        """
+        cd {TEMPDIR}/pooled_screen_1/hisat2/
+        wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_45/gencode.v45.transcripts.fa.gz
+        gunzip gencode.v45.transcripts.fa.gz
+        hisat2-build -p {threads} gencode.v45.transcripts.fa {output}
+        """
+
+rule align_guides_to_transcriptome_hisat2:
+    input:
+        guide_fasta='../resources/pooled_screen_1_guides.fa',
+        index=expand(TEMPDIR / 'pooled_screen_1/hisat2/gencode.v45.transcripts.{i}.ht2', i=range(1,9))
+    output:
+        sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_transcriptome.sam'
+    resources:
+        time='24:00:00',
+        mem_mb=64000,
+        disk_mb=64000
+    threads: 8
+    conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
+    shell:
+        """
+        hisat2 -f \
+        -x $(dirname {input.index})/gencode.v45.transcripts \
+        -U {input.guide_fasta} \
+        -S {output.sam} \
+        -p {threads}
+        """
+
+### DEPRECATED ###
+rule bwa_index_genome:
+    input:
+        '{genome}.fa'
+    output:
+        genome_index=expand('{{genome}}.fa.{idx}', idx=['amb', 'ann', 'bwt', 'pac', 'sa'])
+    shell:
+        """
+        bwa index {input}
+        """
+
+rule align_guides_to_genome_bwa:
+    input:
+        guide_fasta='../resources/pooled_screen_1_guides.fa',
+        genome_fasta='/home/peidli/utils/genomes/homo_sapiens/Homo_sapiens.GRCh38.dna.toplevel.fa',
+        genome_index=expand('/home/peidli/utils/genomes/homo_sapiens/Homo_sapiens.GRCh38.dna.toplevel.fa.{idx}', idx=['amb', 'ann', 'bwt', 'pac', 'sa'])
+    output:
+        TEMPDIR / 'pooled_screen_1/bwa/pooled_screen_1_guides_to_genome.sam'
+    resources:
+        time='10:00:00',
+        mem_mb=64000,
+        disk_mb=64000
+    conda:
+        ROOT / "environments/bwa_env.yaml"
+    threads: 8
+    shell:
+        """
+        bwa mem -t {threads} {input.genome_fasta} {input.guide_fasta} > {output}
+        """
 
 onsuccess: 
     print("Snakemake is done!")
