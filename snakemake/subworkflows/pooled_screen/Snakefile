@@ -27,6 +27,7 @@ sample_names = [x for x in sample_names if 'Undetermined_S0' not in x]
 assert len(sample_names) == 6*(3*3) + 3, f"Expected 57 (6TP x 3lines x 3reps + 3 Pools) samples, got " + str(len(sample_names))
 guide_df = pd.read_csv('../resources/all_gRNA_data.csv', index_col='unique_guide_name')
 ROOT = Path("../../../")
+cell_line_dict = config['cell_lines']
 
 rule all:
     input:
@@ -37,7 +38,11 @@ rule all:
         TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv',
         # Analysis
         # '../results/mageck/pooled_screen_1_mageck.sgrna_summary.txt',
-        # expand('../results/tables/pooled_screen_1_bagel_pr_{feature}.tsv', feature=['gene']), # 'transcript' not working, maybe due to training sets
+        expand('../results/tables/pooled_screen_1_bagel_pr_{feature}_{time}_{line}.tsv', 
+            feature=['gene'],
+            time=['alltimes', 'TP5TP6'],
+            line=['alllines', 'H1975', 'H1299', 'A549']
+            ), # 'transcript' not working, maybe due to training sets
         # # Target alignment
         # TEMPDIR / 'pooled_screen_1/bwa/pooled_screen_1_guides_to_genome.sam',
         # TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_transcriptome.sam',
@@ -336,11 +341,16 @@ rule bagel2_prepare:
     input:
         counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv'
     output:
-        counts=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel2_input_{feature}.txt',
+        counts=temp(TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel2_input_{feature}_{time}_{line}.txt')
+    wildcard_constraints:
+        feature="gene|transcript",
+        time="alltimes|TP5TP6",
+        line="alllines|H1975|H1299|A549"
     run:
         df = pd.read_csv(input.counts, index_col=0)
         df.index.name = 'sgRNA'
 
+        # Select feature grouping
         if wildcards.feature == 'gene':
             # Set gene as target feature
             sdf = df.drop(['Transcript_ID', 'ensembl_gene_id', 'transcript_biotype',
@@ -356,21 +366,40 @@ rule bagel2_prepare:
             nonunique_IDs = cts[cts > 2].index
             sdf = sdf[sdf.Transcript_ID.isin(nonunique_IDs)]
         
+        # select time points
+        if wildcards.time == 'alltimes':
+            # Use all timepoints
+            sdf = sdf
+        elif wildcards.time == 'TP5TP6':
+            # Use only TP5 and TP6
+            mask = [x for x in sdf.columns if ('TP5' in x or 'TP6' in x) or ('pool' in x or x=='Gene')]
+            sdf = sdf.loc[:, mask]
+        
+        # select cell lines
+        if wildcards.line == 'alllines':
+            # Use all cell lines
+            sdf = sdf
+        else:
+            # Use only one cell line (with pools still included)
+            line = wildcards.line
+            mask = [(cell_line_dict[int(x.split('-')[1])]==line) if 'sym' in x else True if ('pool' in x or x=='Gene') else False for x in sdf.columns]  # pool and cell line
+            sdf = sdf.loc[:, mask]
+
         # Save as txt
         sdf.to_csv(output.counts, sep='\t')
 
 rule bagel2_fc:
     input:
         bagel_py="/home/peidli/utils/bagel/BAGEL.py", # clone with github
-        bagel_counts=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel2_input_{feature}.txt'
+        bagel_counts=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel2_input_{index}.txt'
     output:
-        fc=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel_{feature}.foldchange',
-        norm=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel_{feature}.normed_readcount'
+        fc=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel_{index}.foldchange',
+        norm=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel_{index}.normed_readcount'
     shell:
         """
         # Calculate Fold Changes
         {input.bagel_py} fc -i {input.bagel_counts} \
-            -o {TEMPDIR}/pooled_screen_1/bagel2/pooled_screen_1_bagel_{wildcards.feature} \
+            -o {TEMPDIR}/pooled_screen_1/bagel2/pooled_screen_1_bagel_{wildcards.index} \
             -c 1,2,3
         """
 
@@ -383,13 +412,19 @@ rule bagel2_bf:
         bf='../results/tables/pooled_screen_1_bagel_bf_{feature}.tsv'
     shell:
         """
+        # Number of columns in input tsv
+        D=$(head -n 1 {input.fc} | tr '\\t' '\\n' | wc -l)  # count the number of columns
+        D=$((D - 2))  # remove the first two columns (guide and gene names)
+        S=$(seq -s, 1 $D)  # create a string of numbers from 1 to D (Bagel needs this)
+        echo $S
+
         # Calculate Bayes Factors
         {input.bagel_py} bf -i {input.fc} \
             -o {output.bf} \
             -e {input.bagel_folder}/CEGv2.txt \
             -n {input.bagel_folder}/NEGv1.txt \
-            -c 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53
-        """# columns 1-53 are the timepoints (56 samples - 3 pools)
+            -c $S
+        """
         #TODO: Question: Do I have to change the training sets???
 
 rule bagel2_pr:

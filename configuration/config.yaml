@@ -5,11 +5,13 @@ primer_seq: ACCCCTACCAACTGGTCGGGGTTTGAAAC  # sequence left of gRNA
 primer_range:
   min: 28
   max: 34
-cell_lines:
-  - TODO
 basespace_project_ids:
   Symphony: 402672358
   Unindexed Reads: 402688291
   Symphony_Repeat: 403174211
   Cas13_screens_1: 408146834
 basespace_run_id: 274149887
+cell_lines:
+  01: 'H1975'
+  02: 'H1299'
+  03: 'A549'
