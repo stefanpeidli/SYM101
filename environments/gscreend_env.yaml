@@ -8,7 +8,6 @@ channels:
 dependencies:
   - python=3
   - conda-forge::r-base
-  - conda-forge::r-seurat
   - conda-forge::r-irkernel
   - conda-forge::r-optparse
   - conda-forge::jupyter

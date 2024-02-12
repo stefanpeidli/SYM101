@@ -8,7 +8,7 @@ Create Rulegraph: snakemake --forceall --rulegraph | dot -Tpdf > snake_rulegraph
 TASKS:
 - Fix missing guides aligned
 - Annotate exon number
-- Genomic position analysis
+- Genomic position analysis (Konstaninos wants)
 """
 
 import pandas as pd
@@ -24,6 +24,7 @@ TEMPDIR = Path(config['TEMPDIR'])
 DATADIR = Path(config['DATADIR'])
 sample_names = list(pd.read_csv('../resources/pooled_screen_1_fastqs.txt', sep='\t', index_col=0).index)
 sample_names = [x for x in sample_names if 'Undetermined_S0' not in x]
+assert len(sample_names) == 6*(3*3) + 3, f"Expected 57 (6TP x 3lines x 3reps + 3 Pools) samples, got " + str(len(sample_names))
 guide_df = pd.read_csv('../resources/all_gRNA_data.csv', index_col='unique_guide_name')
 ROOT = Path("../../../")
 
@@ -35,12 +36,12 @@ rule all:
         # Counts
         TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv',
         # Analysis
-        '../results/mageck/pooled_screen_1_mageck.sgrna_summary.txt',
-        expand('../results/tables/pooled_screen_1_bagel_pr_{feature}.tsv', feature=['gene']), # 'transcript' not working, maybe due to training sets
-        # Target alignment
-        TEMPDIR / 'pooled_screen_1/bwa/pooled_screen_1_guides_to_genome.sam',
-        TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_transcriptome.sam',
-        TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_genome.sam',
+        # '../results/mageck/pooled_screen_1_mageck.sgrna_summary.txt',
+        # expand('../results/tables/pooled_screen_1_bagel_pr_{feature}.tsv', feature=['gene']), # 'transcript' not working, maybe due to training sets
+        # # Target alignment
+        # TEMPDIR / 'pooled_screen_1/bwa/pooled_screen_1_guides_to_genome.sam',
+        # TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_transcriptome.sam',
+        # TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_genome.sam',
         # "../results/tables/cas_off_finder.txt"
 
 ### UPSTREAM ###
@@ -126,8 +127,10 @@ rule custom_trimming:
         disk_mb=16000,
         time='12:00:00',
     threads: 8
+    conda: 'trimming_env'  # ROOT / "environments/trimming_env.yaml"
     shell:
         """
+        mkdir -p {TEMPDIR}/pooled_screen_1/trimmed/qc
         python scripts/variable_trimming.py -i {input} -o {output.fastq} \
             -q {output.qc} \
             -p {params.primer_seq} \
@@ -333,25 +336,28 @@ rule bagel2_prepare:
     input:
         counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv'
     output:
-        bagel_counts_gene=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel2_input_gene.txt',
-        bagel_counts_transcript=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel2_input_transcript.txt'
+        counts=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel2_input_{feature}.txt',
     run:
         df = pd.read_csv(input.counts, index_col=0)
         df.index.name = 'sgRNA'
-        # Set gene as target feature
-        sdf = df.drop(['Transcript_ID', 'ensembl_gene_id', 'transcript_biotype',
-            'GuideName', 'GuideSeq', 'MatchPos', 'Guide_Score', 'Region',
-            'transcript_length', 'gRNA_occurence', 'transcript_per_gene'], axis=1)
-        sdf.to_csv(output.bagel_counts_gene, sep='\t')
-        # Set non-unique transcripts as target feature
-        # Some transcript have only single guide --> remove them
-        sdf = df.drop(['ensembl_gene_id', 'Gene', 'transcript_biotype',
-            'GuideName', 'GuideSeq', 'MatchPos', 'Guide_Score', 'Region',
-            'transcript_length', 'gRNA_occurence', 'transcript_per_gene'], axis=1)
-        cts = sdf.value_counts('Transcript_ID')
-        nonunique_IDs = cts[cts > 1].index
-        sdf = sdf[sdf.Transcript_ID.isin(nonunique_IDs)]
-        sdf.to_csv(output.bagel_counts_transcript, sep='\t')
+
+        if wildcards.feature == 'gene':
+            # Set gene as target feature
+            sdf = df.drop(['Transcript_ID', 'ensembl_gene_id', 'transcript_biotype',
+                'GuideName', 'GuideSeq', 'MatchPos', 'Guide_Score', 'Region',
+                'transcript_length', 'gRNA_occurence', 'transcript_per_gene'], axis=1)
+        elif wildcards.feature == 'transcript':
+            # Set non-unique transcripts as target feature
+            # Some transcript have only single guide --> remove them
+            sdf = df.drop(['ensembl_gene_id', 'Gene', 'transcript_biotype',
+                'GuideName', 'GuideSeq', 'MatchPos', 'Guide_Score', 'Region',
+                'transcript_length', 'gRNA_occurence', 'transcript_per_gene'], axis=1)
+            cts = sdf.value_counts('Transcript_ID')
+            nonunique_IDs = cts[cts > 2].index
+            sdf = sdf[sdf.Transcript_ID.isin(nonunique_IDs)]
+        
+        # Save as txt
+        sdf.to_csv(output.counts, sep='\t')
 
 rule bagel2_fc:
     input:
@@ -475,6 +481,16 @@ rule align_guides_to_transcriptome_hisat2:
         -U {input.guide_fasta} \
         -S {output.sam} \
         -p {threads}
+        """
+
+rule annotate_exon_number:
+    input:
+        sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_transcriptome.sam'
+    output:
+        annotated_sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_transcriptome_annotated.sam'
+    shell:
+        """
+        python scripts/annotate_exon_number.py -i {input.sam} -o {output.annotated_sam}
         """
 
 ### DEPRECATED ###

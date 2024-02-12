@@ -34,6 +34,7 @@ Samtools	stats	sym-01-01-TP5_S13_L002_R1_001_custom_trimmed_stats	/scratch/peidl
 Samtools	stats	sym-01-02-TP6_S17_L001_R1_001_custom_trimmed_stats	/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/sym-01-02-TP6_S17_L001_R1_001_custom_trimmed_stats.txt
 Samtools	stats	sym-03-03-TP2_S42_L002_R1_001_custom_trimmed_stats	/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/sym-03-03-TP2_S42_L002_R1_001_custom_trimmed_stats.txt
 Samtools	stats	sym-03-01-TP5_S49_L001_R1_001_custom_trimmed_stats	/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/sym-03-01-TP5_S49_L001_R1_001_custom_trimmed_stats.txt
+Samtools	stats	sym-03-03-TP3_S45_L002_R1_001_custom_trimmed_stats	/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/sym-03-03-TP3_S45_L002_R1_001_custom_trimmed_stats.txt
 Samtools	stats	sym-01-02-TP4_S11_L002_R1_001_custom_trimmed_stats	/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/sym-01-02-TP4_S11_L002_R1_001_custom_trimmed_stats.txt
 Samtools	stats	sym-02-01-TP1_S19_L002_R1_001_custom_trimmed_stats	/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/sym-02-01-TP1_S19_L002_R1_001_custom_trimmed_stats.txt
 Samtools	stats	sym-02-03-TP6_S36_L002_R1_001_custom_trimmed_stats	/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/sym-02-03-TP6_S36_L002_R1_001_custom_trimmed_stats.txt
@@ -82,6 +83,7 @@ Samtools	stats	Sym-pool-1-2_S56_L002_R1_001_custom_trimmed_stats	/scratch/peidli
 Samtools	stats	sym-01-03-TP5_S15_L002_R1_001_custom_trimmed_stats	/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/sym-01-03-TP5_S15_L002_R1_001_custom_trimmed_stats.txt
 Samtools	stats	sym-03-03-TP4_S48_L001_R1_001_custom_trimmed_stats	/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/sym-03-03-TP4_S48_L001_R1_001_custom_trimmed_stats.txt
 Samtools	stats	sym-02-01-TP4_S28_L002_R1_001_custom_trimmed_stats	/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/sym-02-01-TP4_S28_L002_R1_001_custom_trimmed_stats.txt
+Samtools	stats	sym-03-03-TP3_S45_L001_R1_001_custom_trimmed_stats	/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/sym-03-03-TP3_S45_L001_R1_001_custom_trimmed_stats.txt
 Samtools	stats	Sym-pool-1-1_S55_L002_R1_001_custom_trimmed_stats	/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/Sym-pool-1-1_S55_L002_R1_001_custom_trimmed_stats.txt
 Samtools	stats	sym-01-01-TP2_S4_L002_R1_001_custom_trimmed_stats	/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/sym-01-01-TP2_S4_L002_R1_001_custom_trimmed_stats.txt
 Samtools	stats	sym-02-03-TP1_S21_L002_R1_001_custom_trimmed_stats	/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/sym-02-03-TP1_S21_L002_R1_001_custom_trimmed_stats.txt
@@ -166,6 +168,7 @@ FastQC	all_sections	sym-02-01-TP2_S22_L001_R1_001	/scratch/peidli/SYMPHONY/poole
 FastQC	all_sections	sym-02-02-TP2_S23_L002_R1_001	/scratch/peidli/SYMPHONY/pooled_screen_1/fastqc/sym-02-02-TP2_S23_L002_fastqc.zip
 FastQC	all_sections	sym-02-03-TP3_S27_L002_R1_001	/scratch/peidli/SYMPHONY/pooled_screen_1/fastqc/sym-02-03-TP3_S27_L002_fastqc.zip
 FastQC	all_sections	sym-02-03-TP4_S30_L002_R1_001	/scratch/peidli/SYMPHONY/pooled_screen_1/fastqc/sym-02-03-TP4_S30_L002_fastqc.zip
+FastQC	all_sections	sym-03-03-TP3_S45_L002_R1_001	/scratch/peidli/SYMPHONY/pooled_screen_1/fastqc/sym-03-03-TP3_S45_L002_fastqc.zip
 FastQC	all_sections	sym-02-01-TP6_S34_L002_R1_001	/scratch/peidli/SYMPHONY/pooled_screen_1/fastqc/sym-02-01-TP6_S34_L002_fastqc.zip
 FastQC	all_sections	sym-03-02-TP4_S47_L001_R1_001	/scratch/peidli/SYMPHONY/pooled_screen_1/fastqc/sym-03-02-TP4_S47_L001_fastqc.zip
 FastQC	all_sections	sym-02-02-TP1_S20_L001_R1_001	/scratch/peidli/SYMPHONY/pooled_screen_1/fastqc/sym-02-02-TP1_S20_L001_fastqc.zip
@@ -206,6 +209,7 @@ FastQC	all_sections	sym-02-03-TP5_S33_L002_R1_001	/scratch/peidli/SYMPHONY/poole
 FastQC	all_sections	sym-01-02-TP6_S17_L001_R1_001	/scratch/peidli/SYMPHONY/pooled_screen_1/fastqc/sym-01-02-TP6_S17_L001_fastqc.zip
 FastQC	all_sections	sym-03-02-TP3_S44_L002_R1_001	/scratch/peidli/SYMPHONY/pooled_screen_1/fastqc/sym-03-02-TP3_S44_L002_fastqc.zip
 FastQC	all_sections	sym-03-01-TP1_S37_L001_R1_001	/scratch/peidli/SYMPHONY/pooled_screen_1/fastqc/sym-03-01-TP1_S37_L001_fastqc.zip
+FastQC	all_sections	sym-03-03-TP3_S45_L001_R1_001	/scratch/peidli/SYMPHONY/pooled_screen_1/fastqc/sym-03-03-TP3_S45_L001_fastqc.zip
 FastQC	all_sections	sym-01-01-TP6_S16_L002_R1_001	/scratch/peidli/SYMPHONY/pooled_screen_1/fastqc/sym-01-01-TP6_S16_L002_fastqc.zip
 FastQC	all_sections	sym-01-02-TP5_S14_L001_R1_001	/scratch/peidli/SYMPHONY/pooled_screen_1/fastqc/sym-01-02-TP5_S14_L001_fastqc.zip
 FastQC	all_sections	sym-03-01-TP3_S43_L001_R1_001	/scratch/peidli/SYMPHONY/pooled_screen_1/fastqc/sym-03-01-TP3_S43_L001_fastqc.zip

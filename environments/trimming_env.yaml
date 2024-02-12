@@ -1,0 +1,15 @@
+name: trimming_env
+
+channels:
+ - conda-forge
+ - bioconda
+ - defaults
+
+dependencies:
+  - python>=3
+  - numpy
+  - matplotlib
+  - pandas
+  - scipy
+  - tqdm
+  - conda-forge::scikit-learn
