@@ -1,5 +1,6 @@
 TEMPDIR: "/scratch/peidli/SYMPHONY/"
-DATADIR: "/home/peidli/data/SYMPHONY/"
+# DATADIR: "/home/peidli/data/SYMPHONY/"
+DATADIR: "/scratch/peidli/SYMPHONY"
 guide_length: 23
 primer_seq: ACCCCTACCAACTGGTCGGGGTTTGAAAC  # sequence left of gRNA
 primer_range:

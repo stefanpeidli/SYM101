@@ -38,15 +38,10 @@ rule all:
         TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv',
         # Analysis
         # '../results/mageck/pooled_screen_1_mageck.sgrna_summary.txt',
-        expand('../results/tables/pooled_screen_1_bagel_pr_{feature}_{time}_{line}.tsv', 
-            feature=['gene'],
-            time=['alltimes', 'TP5TP6'],
-            line=['alllines', 'H1975', 'H1299', 'A549']
-            ), # 'transcript' not working, maybe due to training sets
-        # # Target alignment
-        # TEMPDIR / 'pooled_screen_1/bwa/pooled_screen_1_guides_to_genome.sam',
-        # TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_transcriptome.sam',
-        # TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_genome.sam',
+        expand('../results/tables/pooled_screen_1_bagel_pr_gene_{time}_{line}.tsv', 
+            time=['alltimes', 'TP5TP6'], line=['alllines', 'H1975', 'H1299', 'A549']),
+        # Target alignment
+        expand(TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_{feature}_annotated.csv', feature=['genome', 'transcriptome']),
         # "../results/tables/cas_off_finder.txt"
 
 ### UPSTREAM ###
@@ -520,12 +515,18 @@ rule align_guides_to_transcriptome_hisat2:
 
 rule annotate_exon_number:
     input:
-        sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_transcriptome.sam'
+        sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_{feature}.sam',
+        gtf='/g/huber/users/peidli/utils/genomes/homo_sapiens/Homo_sapiens.GRCh38.111.gtf'
     output:
-        annotated_sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_transcriptome_annotated.sam'
+        annotated_csv=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_{feature}_annotated.csv',
+        series=TEMPDIR / 'pooled_screen_1/hisat2/exon_numbers_{feature}.csv'
+    resources:
+        time='10:00:00',
+        mem_mb=64000,
+        disk_mb=64000
     shell:
         """
-        python scripts/annotate_exon_number.py -i {input.sam} -o {output.annotated_sam}
+        python scripts/annotate_exon_number.py -i {input.sam} -g {input.gtf} -o {output.annotated_csv} -x {output.series}
         """
 
 ### DEPRECATED ###
