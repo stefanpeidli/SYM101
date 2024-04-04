@@ -1,14 +1,12 @@
 """
 Author: Stefan Peidli
 Aim: Snakemake workflow for SYMPHONY.
-Date: 08.12.2023
+Date: 03.04.2024
 Run: snakemake
 Create DAG: snakemake --forceall --dag | dot -Tpdf > snake_dag.pdf
 Create Rulegraph: snakemake --forceall --rulegraph | dot -Tpdf > snake_rulegraph.pdf
-TASKS:
-- Fix missing guides aligned
-- Annotate exon number
-- Genomic position analysis (Konstaninos wants)
+Description:
+...
 """
 
 import pandas as pd
@@ -28,6 +26,7 @@ assert len(sample_names) == 6*(3*3) + 3, f"Expected 57 (6TP x 3lines x 3reps + 3
 guide_df = pd.read_csv('../resources/all_gRNA_data.csv', index_col='unique_guide_name')
 ROOT = Path("../../../")
 cell_line_dict = config['cell_lines']
+cell_lines = list(cell_line_dict.values())
 
 rule all:
     input:
@@ -36,12 +35,15 @@ rule all:
         "../results/tables/trimmed_summary.csv",
         # Counts
         TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv',
-        # Analysis
-        # '../results/mageck/pooled_screen_1_mageck.sgrna_summary.txt',
-        expand('../results/tables/pooled_screen_1_bagel_pr_gene_{time}_{line}.tsv', 
-            time=['alltimes', 'TP5TP6'], line=['alllines', 'H1975', 'H1299', 'A549']),
+        TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts_filtered.csv',  # removed "bad" guides
+        # Analysis (all analysis is run per line and on all lines jointly. Also with all and with filtered guides only)
+        ## MAGeCK
+        expand('../results/mageck/{line}/{feature}_pooled_screen_1_{counts}_mageck.sgrna_summary.txt', 
+            line=['alllines', 'H1975', 'H1299', 'A549'], counts=['counts', 'counts_filtered'], feature=['gene', 'transcript']),
+        ## BAGEL2
+        expand('../results/bagel2/pooled_screen_1_{counts}_bagel_pr_gene.tsv', counts=['counts', 'counts_filtered']),
         # Target alignment
-        expand(TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_{feature}_annotated.csv', feature=['genome', 'transcriptome']),
+        # expand(TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_{feature}_annotated.csv', feature=['genome', 'transcriptome']),
         # "../results/tables/cas_off_finder.txt"
 
 ### UPSTREAM ###
@@ -282,41 +284,61 @@ rule merge_counts:
 ### DOWNSTREAM ###
 rule mageck_prepare_inputs:
     input:
-        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv'
+        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_{counts}.csv'
     output:
-        counts=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_counts.tsv',
-        control=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_control_guides.txt',
-        day0=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_TP1_samples.txt',
-        # treated=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_TP6_samples.txt'
+        gene_counts=TEMPDIR / 'pooled_screen_1/mageck/{line}/gene_pooled_screen_1_{counts}.tsv',
+        transcript_counts=TEMPDIR / 'pooled_screen_1/mageck/{line}/transcript_pooled_screen_1_{counts}.tsv',
+        control=TEMPDIR / 'pooled_screen_1/mageck/{line}/pooled_screen_1_{counts}_control_guides.txt',
+        day0=TEMPDIR / 'pooled_screen_1/mageck/{line}/pooled_screen_1_{counts}_day0_samples.txt',
     run:
+        line = wildcards.line
         df = pd.read_csv(input.counts, index_col=0)
-        # needs counts as a tsv in a very specific format
-        df.index.name = 'sgRNA'
-        df.drop(['Transcript_ID', 'ensembl_gene_id', 'transcript_biotype',
+        # Remove initial time points
+        df = df.loc[:, ~df.columns.str.contains('TP1|TP2|TP3|TP4|TP5')].copy()  
+        # Remove other lines
+        if line == 'alllines':
+            df = df
+        else:
+            # keep initial metadata columns but remove columns for other cell lines
+            mask = [(cell_line_dict[int(x.split('-')[1])]==line) if 'sym' in x else True for x in df.columns]
+            df = df.loc[:, mask]
+
+        # Define the count matrix (transcripts)
+        sdf = df.copy()
+        sdf.index.name = 'sgRNA'
+        sdf.drop(['Gene', 'ensembl_gene_id', 'transcript_biotype',
             'GuideName', 'GuideSeq', 'MatchPos', 'Guide_Score', 'Region',
             'transcript_length', 'gRNA_occurence', 'transcript_per_gene'], axis=1, inplace=True)
-        df.rename(dict(Gene='gene'), axis=1, inplace=True)
-        df.to_csv(output.counts, sep='\t')
-        # needs control guide names as a file
+        sdf.rename(dict(Transcript_ID='gene'), axis=1, inplace=True)
+        sdf.to_csv(output.transcript_counts, sep='\t')
+
+        # Define the count matrix (genes)
+        sdf = df.copy()
+        sdf.index.name = 'sgRNA'
+        sdf.drop(['Transcript_ID', 'ensembl_gene_id', 'transcript_biotype',
+            'GuideName', 'GuideSeq', 'MatchPos', 'Guide_Score', 'Region',
+            'transcript_length', 'gRNA_occurence', 'transcript_per_gene'], axis=1, inplace=True)
+        sdf.rename(dict(Gene='gene'), axis=1, inplace=True)
+        sdf.to_csv(output.gene_counts, sep='\t')
+
+        # Define the control guides
         with open(output.control, 'w') as file:
             file.write('\n'.join([x for x in df.index if 'control' in x.lower()]))
-        # Initial timepoint TP1 is "Day0"
-        day0 = ','.join([x for x in df.columns if 'TP1' in x])
+        
+        # Define the control samples
+        # Using plasmid pools as Day0
+        day0 = ','.join([x for x in df.columns if 'pool' in x])
         with open(output.day0, 'w') as file:
             file.write(day0)
-        # # Final timepoint TP6 only (for now) is "Treatment"
-        # treated = ','.join([x for x in df.columns if 'TP6' in x])
-        # with open(output[2], 'w') as file:
-        #     file.write(treated)
 
 rule mageck:
     input:
-    # I should run this per cell line I guess
-        counts=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_counts.tsv',
-        control=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_control_guides.txt',
-        day0=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_TP1_samples.txt',
+    # I should run this per cell line I guess and only use TP6
+        counts=TEMPDIR / 'pooled_screen_1/mageck/{line}/{feature}_pooled_screen_1_{counts}.tsv',
+        control=TEMPDIR / 'pooled_screen_1/mageck/{line}/pooled_screen_1_{counts}_control_guides.txt',
+        day0=TEMPDIR / 'pooled_screen_1/mageck/{line}/pooled_screen_1_{counts}_day0_samples.txt',
     output:
-        '../results/mageck/pooled_screen_1_mageck.sgrna_summary.txt'
+        '../results/mageck/{line}/{feature}_pooled_screen_1_{counts}_mageck.sgrna_summary.txt'
     conda: "mageck_env"  # "../environments/mageck_env.yaml"
     shell:
         """
@@ -325,18 +347,33 @@ rule mageck:
         --count-table {input.counts} \
         --control-sgrna {input.control} \
         --day0-label $(cat {input.day0}) \
-        --output-prefix ../results/mageck/pooled_screen_1_mageck \
+        --output-prefix ../results/mageck/{wildcards.line}/{wildcards.feature}_pooled_screen_1_{wildcards.counts}_mageck \
         --norm-method control \
         --pdf-report \
         --sort-criteria neg \
         --adjust-method fdr
         """
 
-rule bagel2_prepare:
+rule mageck_filter_guides:
+    # Takes MAGeCK results per line, aggregates and marks guides that did not have an effect in any line according to MAGeCK score
     input:
+        mageck=expand('../results/mageck/{line}/gene_pooled_screen_1_mageck.sgrna_summary.txt', line=cell_lines),
         counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv'
     output:
-        counts=temp(TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel2_input_{feature}_{time}_{line}.txt')
+        filtering_qc_plot='../results/figures/mageck_score_vs_LFC.pdf',
+        filtered_tab='../results/tables/pooled_screen_1_mageck_filtered_guides_v1.tsv',
+        filtered_heatmap=expand('../results/figures/mageck_guide_filtering_count_matrix_l2fc_heatmap.{ext}', ext=['pdf', 'png']),
+        filtered_counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts_filtered.csv'
+    log:
+        notebook="../results/reports/mageck_filter_guides_report.ipynb"
+    notebook: 
+        '../../scripts/mageck_filter_guides.py.ipynb'
+
+rule bagel2_prepare:
+    input:
+        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_{counts}.csv'
+    output:
+        counts=temp(TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_{counts}_bagel2_input_{feature}_{time}_{line}.txt')
     wildcard_constraints:
         feature="gene|transcript",
         time="alltimes|TP5TP6",
@@ -386,25 +423,25 @@ rule bagel2_prepare:
 rule bagel2_fc:
     input:
         bagel_py="/home/peidli/utils/bagel/BAGEL.py", # clone with github
-        bagel_counts=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel2_input_{index}.txt'
+        bagel_counts=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_{counts}_bagel2_input_{index}.txt'
     output:
-        fc=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel_{index}.foldchange',
-        norm=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel_{index}.normed_readcount'
+        fc=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_{counts}_bagel_{index}.foldchange',
+        norm=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_{counts}_bagel_{index}.normed_readcount'
     shell:
         """
         # Calculate Fold Changes
         {input.bagel_py} fc -i {input.bagel_counts} \
-            -o {TEMPDIR}/pooled_screen_1/bagel2/pooled_screen_1_bagel_{wildcards.index} \
+            -o {TEMPDIR}/pooled_screen_1/bagel2/pooled_screen_1_{wildcards.counts}_bagel_{wildcards.index} \
             -c 1,2,3
         """
 
 rule bagel2_bf:
     input:
         bagel_py="/home/peidli/utils/bagel/BAGEL.py",
-        fc=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_bagel_{feature}.foldchange',
+        fc=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_{counts}_bagel_{index}.foldchange',
         bagel_folder="/home/peidli/utils/bagel/",
     output:
-        bf='../results/tables/pooled_screen_1_bagel_bf_{feature}.tsv'
+        bf='../results/bagel2/pooled_screen_1_{counts}_bagel_bf_{index}.tsv'
     shell:
         """
         # Number of columns in input tsv
@@ -420,15 +457,14 @@ rule bagel2_bf:
             -n {input.bagel_folder}/NEGv1.txt \
             -c $S
         """
-        #TODO: Question: Do I have to change the training sets???
 
 rule bagel2_pr:
     input:
         bagel_py="/home/peidli/utils/bagel/BAGEL.py",
-        bf='../results/tables/pooled_screen_1_bagel_bf_{feature}.tsv',
+        bf='../results/tables/pooled_screen_1_{counts}_bagel_bf_{index}.tsv',
         bagel_folder="/home/peidli/utils/bagel/",
     output:
-        pr='../results/tables/pooled_screen_1_bagel_pr_{feature}.tsv'
+        pr='../results/bagel2/pooled_screen_1_{counts}_bagel_pr_{index}.tsv'
     shell:
         """
         # Calculate Precision-Recall
@@ -437,6 +473,26 @@ rule bagel2_pr:
             -e {input.bagel_folder}/CEGv2.txt \
             -n {input.bagel_folder}/NEGv1.txt
         """
+
+rule bagel2_merge:
+    input:
+        pr=expand('../results/bagel2/pooled_screen_1_{{counts}}_bagel_pr_gene_{time}_{line}.tsv', time=['alltimes', 'TP5TP6'], line=['alllines', 'H1975', 'H1299', 'A549'])
+    output:
+        '../results/bagel2/pooled_screen_1_{counts}_bagel_pr_gene.tsv'
+    run:
+        # merge BAGEL2 results
+        file = f'../results/bagel2/pooled_screen_1_counts_bagel_pr_gene.tsv'
+
+        # aggregate results
+        datas = {}
+        for line in ['alllines', 'A549', 'H1299', 'H1975']:
+            for time in ['alltimes', 'TP5TP6']:
+                tdf = pd.read_table(f'../results/bagel2/pooled_screen_1_{wildcards.counts}_bagel_pr_gene_{time}_{line}.tsv', index_col='Gene')
+                datas[(line, time)] = tdf
+        df = pd.concat(datas, axis=1)
+
+        # write to file
+        df.to_csv(output[0], sep='\t')
 
 rule cas_off_finder:
     input:
