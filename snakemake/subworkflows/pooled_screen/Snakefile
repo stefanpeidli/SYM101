@@ -357,11 +357,12 @@ rule mageck:
 rule mageck_filter_guides:
     # Takes MAGeCK results per line, aggregates and marks guides that did not have an effect in any line according to MAGeCK score
     input:
-        mageck=expand('../results/mageck/{line}/gene_pooled_screen_1_mageck.sgrna_summary.txt', line=cell_lines),
+        mageck=expand('../results/mageck/{line}/gene_pooled_screen_1_counts_mageck.sgrna_summary.txt', line=cell_lines),
         counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv'
     output:
         filtering_qc_plot='../results/figures/mageck_score_vs_LFC.pdf',
-        filtered_tab='../results/tables/pooled_screen_1_mageck_filtered_guides_v1.tsv',
+        filtering_hist_plot='../results/figures/filtering_good_guides_hist.pdf',
+        filtered_tab='../results/tables/pooled_screen_1_mageck_filtered_guides_v2.tsv',
         filtered_heatmap=expand('../results/figures/mageck_guide_filtering_count_matrix_l2fc_heatmap.{ext}', ext=['pdf', 'png']),
         filtered_counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts_filtered.csv'
     log:
@@ -461,7 +462,7 @@ rule bagel2_bf:
 rule bagel2_pr:
     input:
         bagel_py="/home/peidli/utils/bagel/BAGEL.py",
-        bf='../results/tables/pooled_screen_1_{counts}_bagel_bf_{index}.tsv',
+        bf='../results/bagel2/pooled_screen_1_{counts}_bagel_bf_{index}.tsv',
         bagel_folder="/home/peidli/utils/bagel/",
     output:
         pr='../results/bagel2/pooled_screen_1_{counts}_bagel_pr_{index}.tsv'

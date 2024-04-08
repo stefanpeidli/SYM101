@@ -8,7 +8,7 @@ gstable=read.table('transcript_pooled_screen_1_counts_filtered_mageck.gene_summa
 # gstablename='__GENE_SUMMARY_FILE__'
 startindex=3
 # outputfile='__OUTPUT_FILE__'
-targetgenelist=c("ENST00000286788","ENST00000534624","ENST00000293831","ENST00000439602","ENST00000456292","ENST00000392367","ENST00000493536","ENST00000451311","ENST00000293308","ENST00000245458")
+targetgenelist=c("ENST00000493536","ENST00000293831","ENST00000451311","ENST00000245458","ENST00000293308","ENST00000392367","ENST00000330752","ENST00000534624","ENST00000230050","ENST00000527673")
 # samplelabel=sub('.\\w+.\\w+$','',colnames(gstable)[startindex]);
 samplelabel='sym-03-01-TP6_vs_Sym-pool-1-1,Sym-pool-1-2,Sym-pool-1-3 neg.'
 
@@ -114,217 +114,7 @@ plotrankedvalues(pvec,targetgenelist,xlab='Genes',ylab='p value',main=paste('Dis
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(3728.936964880427,3694.8198877969494,3729.1036192028882,226.04098721210042),c(3986.86343590969,4021.618036717618,4060.121656855889,730.9637118936754),c(2793.2037211463576,2724.9058481431857,2577.4080815595653,105.68150051474825))
-targetgene="ENST00000286788"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(3471.010493851164,3353.7302746377673,3243.5647133508733,321.4478973990259),c(2990.1475769322674,2922.1280546346684,3011.440031345242,249.5257651042667),c(3024.137887067907,3099.3422111922323,3092.477642222948,76.3255281495404),c(2485.291499917625,2561.030391541568,2387.862483235441,158.5222507721224),c(1853.4716173963302,1671.1485516234784,1755.3570627408071,132.1018756434353))
-targetgene="ENST00000534624"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(3072.1242072593973,3038.365297107909,3045.7780020561345,48.437354402592945),c(2973.1524218644477,3102.200504039935,2992.8975271613604,57.244146112155306),c(2672.238205663641,2699.181212513862,2576.0345627311294,30.82377098346824),c(2469.2960598537948,2323.7920851822482,2362.4523849093803,71.92213229475922),c(2853.1866213857206,2809.7018692916977,2859.666200803099,362.5462587103169),c(2536.276965121084,2547.6916915856223,2615.1798493415467,537.2142942833036),c(2028.4217430944736,2048.443207520227,2093.929453950204,568.0380652667718))
-targetgene="ENST00000293831"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2673.2379206676305,2636.298769864404,2720.254039716877,99.81030604170668),c(2635.248750516034,2498.1479488921095,2722.3143179595304,264.2037512868706),c(2106.399513405646,2173.2553285365757,2150.243725916067,130.63407702517492),c(2483.292069909646,2241.8543568814393,2418.7666568752434,174.6680355729867))
-targetgene="ENST00000439602"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2715.225950835185,2682.984219710214,2634.409112939646,563.6346694119907),c(2122.394953469476,2162.774921428333,2248.4503221492187,121.82728531561257),c(2209.370158816553,2038.9155646945517,2163.978914200424,145.31206320777883),c(2392.3180045466115,2448.6042061985972,2373.440535536866,265.67154990513103),c(2371.3239894628346,2250.429235424547,2396.7903556202727,293.55972365207845))
-targetgene="ENST00000456292"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2884.177786509392,2819.229512117373,2828.762027163296,296.4953208885993),c(2548.273545168957,2545.786163020487,2458.5987028998784,74.85772953128001),c(2576.2655652806598,2495.289656044407,2481.261763569067,198.15281346515297),c(3032.1356070998218,2913.5531760915605,3098.658476950908,252.4613623407875),c(2427.3080296862404,2229.468421208061,2231.96809620799,137.9730701164769),c(570.837267277942,583.0917409313391,627.0113451808908,136.5052714982165),c(777.7782731037458,810.8024044649829,810.3761087770549,479.9701481711483))
-targetgene="ENST00000392367"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2339.333109335174,2430.5016848298137,2425.634251017422,38.1627640747702),c(2814.1977362301345,2978.3411473061537,2830.1355459917318,548.9566832293867),c(2335.3342493192163,2168.4915071237383,2282.101533445893,456.48537027898203),c(2179.3787086968714,2179.9246785145488,2275.9206987179323,619.4110169058856),c(1620.538021466802,1603.5022875611826,1604.2699916128815,171.73243833646592),c(2391.3182895426226,2312.3589137914378,2333.608489512231,390.4344324572644),c(1366.610410453497,1424.3826024384834,1401.675964418618,143.84426458951845),c(2004.4285829987282,2165.6332142760357,2109.038161062996,422.726002058993),c(1959.4414078192056,1892.1898651791494,1813.7316129493238,509.32612053635614),c(2542.2752551450203,2466.7067275673808,2393.3565585491833,1818.6024880246262))
+targetmat=list(c(2647.2154758046836,2876.29800684222,2685.0923297401564,662.5561669404798),c(2200.5272516458117,2347.2284758331743,2301.321550265041,46.06005438623656),c(2196.765666600263,2094.1952218723263,2165.1448220641932,550.9491120815219),c(2050.063849823876,2105.236672954254,2159.28075242875,747.5901134996857),c(1524.3823397084875,1548.563514240389,1522.0518520439227,207.27024473806452),c(2249.4278572379408,2233.133481319919,2214.0120690262197,471.2297871822663),c(1885.4945040811335,2091.4348591018443,2000.9508722717837,510.20367935523575),c(1285.5216893161644,1375.5807806235184,1329.8406806599514,173.61097422504548),c(1843.176672318714,1827.3601540590685,1720.7786563561644,614.7245720009264),c(2391.427692707393,2382.193070925946,2270.698075502171,2194.938745559504))
 targetgene="ENST00000493536"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
 
@@ -359,7 +149,42 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2612.2553054242776,2633.440477016701,2679.048474863806,85.13231985910275),c(2560.2701252168295,2574.3690914975136,2617.926886998418,46.969555784332556),c(2332.3351043072485,2380.0051778537336,2285.535330516982,500.5193288267938),c(2741.218540938909,2651.5429983854847,2697.590979047688,537.2142942833036),c(2514.2832350333174,2360.9498922023827,2376.8743326079552,253.9291609590479),c(2652.243905583853,2541.9751058902166,2554.058261476159,284.7529319425161),c(2730.221675895026,2745.866662359672,2769.7007175405615,958.4724977240362))
+targetmat=list(c(2889.837711242555,2934.2656250223413,2889.6832036878413,58.46083825945409),c(2796.7384813652325,2995.9137268964387,2839.512830140161,69.09008157935484),c(2513.6792066877156,2606.70257625848,2444.0139113941586,37.2023516196526),c(2683.8909299987804,2713.436603383783,2713.1095513317186,437.5705166692473),c(2322.7787656261344,2244.174932401847,2241.377727324955,86.80548711252274),c(2385.78531513907,2460.403349422935,2481.1530190852986,648.3838425139454),c(1908.0640143544238,1978.2599855120832,1986.6164798295893,685.586194133598))
+targetgene="ENST00000293831"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2457.2554310044898,2543.2142325373943,2541.748405318212,102.74935209237387),c(2408.3548254123607,2486.166735280767,2483.759272256607,56.6892977061373),c(2578.5665487234255,2560.6965300837805,2559.3406142245412,648.3838425139454),c(2193.944477816102,2298.4620668879925,2168.402638528328,604.0953286810256),c(2365.096597388554,2280.059648418113,2255.0605564743223,306.4765157238048),c(2494.8712814599735,2454.882623881971,2423.163886023694,343.6788673434574),c(2568.222189848167,2651.7885015096854,2627.754759971379,1156.8159813158643))
 targetgene="ENST00000451311"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
 
@@ -394,7 +219,42 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2291.3467891436835,2198.0271998833323,2195.5698472544445,114.48829222431061),c(1847.473327372394,1861.7014081369878,1898.8897803123364,139.44086873473728),c(2065.411198242081,2090.3648359531994,2063.025280310401,130.63407702517492),c(2833.192321305933,2794.4576407706168,2668.0603242363204,314.10890430772395),c(3182.0928576982305,3227.965389338851,3097.2849581224727,648.7669892710934),c(2214.3687338365003,2194.216142753062,2145.436410016542,509.32612053635614))
+targetmat=list(c(2943.4402981416197,2960.029010880173,2963.309855777295,513.7467604618693),c(2541.8910945293287,2453.0423820349833,2470.7280064000665,173.61097422504548),c(2235.321913317134,2278.2194065711246,2296.7606072152516,224.98565027123243),c(1984.2361115267788,1929.4935765669018,2126.702587787399,63.77545991940447),c(2080.156530188263,2108.91715664823,2292.1996641654623,170.06789311841192),c(2086.7393040179727,2000.342887675939,1904.5195049333845,393.28200283632754),c(1294.9256519300352,1452.8709381970136,1394.9970099426534,410.9974083694955))
+targetgene="ENST00000245458"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2155.388231099231,2122.71897050064,2083.0478471679885,138.1801631587097),c(1737.852291043359,1797.9162845072608,1801.572504666715,168.2963525650951),c(1942.8586760257465,2018.7453061458189,1957.2961316523733,157.66710924519438),c(2665.0830047710383,2698.714668607879,2531.3233926329794,379.1096784097932),c(2993.281299995136,3117.3696887976457,2938.5504506498683,783.0209245660214),c(2082.977718972424,2119.038486806664,2035.483726791616,614.7245720009264))
 targetgene="ENST00000293308"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
 
@@ -429,8 +289,148 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(3129.1079624867925,3065.0426970198005,3123.3818158627505,425.6615992955138),c(2702.229655783323,2540.069577325082,2604.191698714061,143.84426458951845),c(2376.3225644827817,2359.044363637248,2420.826935117897,186.41042451906984),c(2109.398658417614,1997.9467005441472,2241.58272800704,52.840750257374125),c(2211.369588824532,2183.7357356448188,2416.019619218372,140.90866735299767),c(2218.367593852458,2071.3095503018485,2007.3977677587554,325.8512932538071),c(1376.6075604933908,1504.4148021741576,1470.3519058404022,340.529279436411))
-targetgene="ENST00000245458"
+targetmat=list(c(2713.0432141017804,2722.637812618723,2683.7892031545025,357.8511917699917),c(2397.0700702757154,2458.563107575947,2332.5965883207377,90.34856821915632),c(2423.401165594554,2409.7966986307656,2354.0981769840296,239.15797469776675),c(2852.2218607870714,2813.729784044628,2939.853577235522,304.704975170488),c(2283.2821226478763,2153.0829609759417,2117.5807016878207,166.52481201177832),c(731.628291359163,783.0229058933874,768.8446855358857,579.2937609345905),c(536.9662652520335,563.1140051783233,594.8772863510709,164.75327145846154))
+targetgene="ENST00000392367"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2586.0897188145223,2695.954305837397,2638.179772656611,21.25848663980149),c(2635.9307206680382,2715.276845230771,2717.018931088681,246.2441369110339),c(2567.28179358678,2534.0130233024547,2563.9015572743306,180.69713643831264),c(2432.8051282084252,2220.251788391003,2171.0088916996365,38.97389217296939),c(2791.0961037969096,2832.132202514508,2708.5486082819293,969.0326826642845),c(2025.6135470278111,2007.703855063891,2031.5743470346538,914.114925511464),c(2400.8316553212635,2285.5803739590765,2298.0637338009055,1854.80295932268))
+targetgene="ENST00000330752"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(3265.0558195360077,3238.8256506988528,3077.3334320220238,387.96738117637716),c(2812.725217808813,2822.0108723560743,2857.10503904649,301.16189406385445),c(2844.6986906959746,2993.1533641259566,2933.989507600079,92.12010877247312),c(2337.825105808328,2473.285042351851,2265.4855691595544,191.3263797582134),c(1743.4946686116814,1613.8920998084623,1665.3957764658676,159.43864979851116),c(1250.7270276448417,1242.1632467168895,1399.5579529924428,1690.0496878642184))
+targetgene="ENST00000534624"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(3234.9631391716207,3048.360619535596,3152.2632106971314,258.64492078425144),c(2847.519879480136,2887.3394579241476,2890.9863302734957,533.233706548354),c(2271.056971249844,2315.9443644343783,2421.209196145213,33.659270513019024),c(2357.5734272974573,2396.9150057018496,2458.348303836353,85.03394655920596),c(2326.540350671683,2361.030289685584,2422.512322730867,717.4739240933003))
+targetgene="ENST00000230050"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2508.036829119393,2445.6814146470315,2437.4982784658882,143.49478481866004),c(2335.944313285554,2523.891693144021,2464.212373471796,69.09008157935484),c(2727.149158022587,2763.1231332524585,2690.304836082773,334.82116457687346),c(1560.1173976411972,1524.6403702295452,1618.483219382322,297.6188129572208),c(2949.0826757099426,2950.827801645233,3010.2224128608404,1314.4830905610588),c(2892.6589000267163,2926.9046576343894,2937.247324064214,1516.4387136391729))
+targetgene="ENST00000527673"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
 
 # set up color using RColorBrewer
@@ -469,7 +469,7 @@ for(i in 1:length(targetmat)){
 # gstablename='__GENE_SUMMARY_FILE__'
 startindex=9
 # outputfile='__OUTPUT_FILE__'
-targetgenelist=c("ENST00000284142","ENST00000286307","ENST00000291842","ENST00000314133","ENST00000240333","ENST00000355451","ENST00000368748","ENST00000374518","ENST00000521831","ENST00000442411")
+targetgenelist=c("ENST00000284142","ENST00000355710","ENST00000292807","ENST00000321253","ENST00000306704","ENST00000563280","ENST00000286307","ENST00000314133","ENST00000414790","ENST00000452120")
 # samplelabel=sub('.\\w+.\\w+$','',colnames(gstable)[startindex]);
 samplelabel='sym-03-01-TP6_vs_Sym-pool-1-1,Sym-pool-1-2,Sym-pool-1-3 pos.'
 
@@ -575,7 +575,7 @@ plotrankedvalues(pvec,targetgenelist,xlab='Genes',ylab='p value',main=paste('Dis
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2058.4131932141554,2098.9397144963073,2035.554903741687,2724.234235491288),c(1939.4471077394178,1798.8189654875298,1810.2978158782346,2527.5492206443955))
+targetmat=list(c(1936.275902196037,2027.0263944572648,1931.2335999392924,3287.979266955964),c(1824.368747090972,1737.1883035566573,1717.5208398920292,3050.5928328115137),c(2389.5469001846186,2525.7319349910085,2558.6890509317145,2749.430938747659))
 targetgene="ENST00000284142"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
 
@@ -610,7 +610,182 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(1876.4650624880862,1763.5666870325306,1805.4904999787095,2123.9046006227877),c(2001.42943798676,1922.678322221311,2006.0242489303198,2369.026969872273))
+targetmat=list(c(2081.0969264496503,2069.3519569379887,2073.274397775583,2965.5588862523077),c(1910.8852031385852,1833.8010005235265,1860.864764313974,2327.804287058263),c(2255.070234806263,2265.3377136422087,2290.2449742869812,2972.6450484655747),c(2316.1959917964246,2326.9858155163065,2270.0465122093437,3000.9896973186433))
+targetgene="ENST00000355710"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2345.348275899425,2483.406372510285,2475.9405127426826,3227.746888143193),c(2035.0175096416822,2177.0061049867854,2033.5290369131349,132.8655414987593),c(3667.545419409686,3901.312715614527,3827.9343453587526,5911.630826418131),c(1804.620425601843,1984.7008319765412,1966.4180177519515,2786.633290367312))
+targetgene="ENST00000292807"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2415.8779955034574,2463.1637121934173,2354.0981769840296,3218.8891853766086),c(1630.6471172452295,1718.7858850867774,1763.130270389921,2301.2311787585113),c(2539.069905745167,2740.1201101651086,2653.1657283916325,3362.383970195269))
+targetgene="ENST00000321253"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2149.7458535309083,2117.1982449596762,2301.321550265041,2733.487073767808),c(1608.0776069719393,1610.2116161144863,1553.3268900996197,1989.440041374756),c(2006.8056218000693,2090.5147381783504,1944.264865795833,2561.647640096079),c(3013.029621484265,2984.872275814511,3130.1100587410124,3789.325243544615))
+targetgene="ENST00000306704"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2632.16913562249,2581.8593113241423,2780.220570492902,4055.056326542134),c(2368.858182434102,2307.6632761229325,2333.248151613565,2947.8434807191397),c(1587.3888892214231,1638.7353647428001,1621.7410358464572,2134.706366746733),c(2260.712612374586,2280.9797693416067,2354.0981769840296,2868.124155819884),c(2133.7591170873275,2177.9262259102798,2167.0995119426743,2186.0810427929196))
+targetgene="ENST00000563280"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(1765.1237826235847,1703.1438293873796,1712.9598968422401,2563.4191806493964),c(1882.673315296972,1856.8040236108764,1903.2163783477306,2859.2664530533),c(2019.0307731981015,2222.0920302379914,2146.2494865722097,2049.6724201875268),c(2082.037322711037,1988.381315670517,1954.0383151882381,2421.695936384053))
 targetgene="ENST00000286307"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
 
@@ -645,42 +820,7 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2447.3023297660284,2581.0384414754863,2359.0185878382913,3122.0076610398546),c(2053.4146181942083,1891.2371008965818,1937.3483075085355,2073.999447601934))
-targetgene="ENST00000291842"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2291.3467891436835,2316.169970921708,2209.3050355388013,3157.234827878104),c(2159.384408617084,1996.041171979012,2021.8197154573302,2418.9321228931267),c(1705.5137968059005,1515.847973564968,1595.3421192280496,1359.1815205091234),c(2616.2541654402353,2489.5730703490017,2721.6275585453122,1555.866535356016),c(1512.568801035948,1537.7615520640218,1547.2689602328005,1497.1545906256001))
+targetmat=list(c(2155.388231099231,2236.813965013895,2096.079113024529,3810.5837301844167),c(2031.2559245961338,1927.6533347199138,1918.202334082752,2919.498831866071),c(2083.9181152338115,2106.156793877748,2024.4071508135567,2147.1071506199505),c(1604.316021926391,1463.9123892789416,1513.5815292371715,1640.4465523713482),c(2461.017016050038,2404.2759730898015,2582.145329473487,1877.8329865157982),c(1422.8195434786808,1485.0751705193034,1467.97209873928,1806.9713643831265))
 targetgene="ENST00000314133"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
 
@@ -715,8 +855,8 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2787.205431122421,2771.591297988996,2862.41323845997,3794.259428203114),c(2927.1655316809356,2984.057733001559,2852.7986066609205,1243.2254296665524),c(3611.9703094136685,3459.487110002765,3571.835713347002,2606.810346030457))
-targetgene="ENST00000240333"
+targetmat=list(c(1910.8852031385852,1809.8778565126827,1780.7224792962504,2031.957014654359),c(2500.5136590282964,2534.0130233024547,2707.8970449891026,3126.7690766041355),c(1945.6798648099077,1894.52898147413,1961.2055114093355,2299.4596382051946),c(1945.6798648099077,1916.6118836379858,1956.6445683595464,2386.2651253177173),c(2119.653173166521,2112.597640342206,2098.685366195837,2326.0327465049463),c(2645.3346832819093,2751.161561247037,2864.9237985604145,3199.4022392901243))
+targetgene="ENST00000414790"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
 
 # set up color using RColorBrewer
@@ -750,148 +890,8 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2848.188046365774,2720.1420267303483,2752.5317321851153,3613.720198157086))
-targetgene="ENST00000355451"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2990.1475769322674,3087.9090398014214,2937.270014609715,3895.537532863081))
-targetgene="ENST00000368748"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2384.3202845146966,2405.7298134830576,2328.801173612706,3108.797473475511))
-targetgene="ENST00000374518"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2174.3801336769247,2257.0985854025203,2216.1726296809798,2869.546298699067))
-targetgene="ENST00000521831"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(1941.4465377473966,1999.8522291092822,2033.4946254990336,2592.132359847853))
-targetgene="ENST00000442411"
+targetmat=list(c(1993.6400741406499,1896.369223321118,1933.1882898177735,2471.299071876923),c(3646.8567016591696,3450.453463102471,3360.1119011089513,4028.483218242382),c(3768.1678193781054,3883.830418068141,3828.5859086515798,4418.222139972076),c(1815.905180738488,1808.0376146656947,1845.8788085789527,2207.339529432721))
+targetgene="ENST00000452120"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-01-TP6")
 
 # set up color using RColorBrewer
@@ -930,7 +930,7 @@ for(i in 1:length(targetmat)){
 # gstablename='__GENE_SUMMARY_FILE__'
 startindex=15
 # outputfile='__OUTPUT_FILE__'
-targetgenelist=c("ENST00000534624","ENST00000456292","ENST00000293831","ENST00000245458","ENST00000439602","ENST00000451311","ENST00000392367","ENST00000230050","ENST00000330752","ENST00000493536")
+targetgenelist=c("ENST00000493536","ENST00000293831","ENST00000451311","ENST00000245458","ENST00000392367","ENST00000330752","ENST00000534624","ENST00000230050","ENST00000293308","ENST00000396466")
 # samplelabel=sub('.\\w+.\\w+$','',colnames(gstable)[startindex]);
 samplelabel='sym-03-02-TP6_vs_Sym-pool-1-1,Sym-pool-1-2,Sym-pool-1-3 neg.'
 
@@ -1036,8 +1036,8 @@ plotrankedvalues(pvec,targetgenelist,xlab='Genes',ylab='p value',main=paste('Dis
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(3512.3066350901763,3365.832055939649,3306.5231568116756,372.6774221913271),c(3025.7226801712895,2932.672419195143,3069.8928737283927,264.7192800486014),c(3060.117388003394,3110.5260448783174,3152.5034459290655,48.80299576314998),c(2514.8601079591526,2570.271751808459,2434.2115215401645,204.08525500953627),c(1875.5231859035675,1677.178814238109,1789.4290046179638,128.6624433755772))
-targetgene="ENST00000534624"
+targetmat=list(c(2684.0411668041515,2917.525762689109,2730.8601441035935,844.6182938140837),c(2231.1390161000763,2380.8727513179515,2340.5479322916503,33.98866373497319),c(2227.325103252042,2124.212615444789,2202.0500506809612,382.3724670184484),c(2078.5825021787036,2135.412330464709,2196.0860270709313,657.6806432717312),c(1545.5881816659075,1570.7600315437523,1547.9954614477053,180.1399177953579),c(2280.7198831245223,2265.1423627787804,2251.7502474312087,560.8129516270576),c(1911.723815077202,2121.4126866898096,2035.05738960013,407.86396481967824),c(1303.4047158157284,1395.297829565009,1352.5080208967324,183.53878416885522),c(1868.8172955368161,1853.5528357967275,1750.1095948987115,662.7789428319771),c(2424.695093137818,2416.3385155476976,2309.4024756614954,1903.3651691584985))
+targetgene="ENST00000493536"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
 
 # set up color using RColorBrewer
@@ -1071,42 +1071,7 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2747.5301903527993,2692.665644751719,2685.5436861167877,578.2415558603527),c(2147.6460213987457,2170.5791951656256,2292.0933337712104,181.90207511719538),c(2235.656009086777,2046.2728976451274,2205.9823135959327,173.028803160259),c(2420.780465947809,2457.439881751391,2419.509640046824,384.50845146724225),c(2399.536675816215,2258.5498057185937,2443.312686274137,186.33871109566354))
-targetgene="ENST00000456292"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(3108.6746225898937,3049.3290984066875,3104.8973534744405,28.09869453029847),c(3008.5253262552374,3113.394651744175,3050.9904546655266,68.02841833651209),c(2704.031001035726,2708.9210836582456,2626.0360705485064,96.12711286681056),c(2498.674363096986,2332.1773819422738,2408.308206528089,210.00076964749383),c(2887.132239788987,2819.840549138075,2915.1730732508613,317.95891179021953),c(2566.452169707309,2556.88491976779,2665.9411774590008,708.3828778954194),c(2052.554770333516,2055.8349205313198,2134.5731749139954,610.7768863691194))
+targetmat=list(c(2930.038545502365,2976.324266543688,2938.938301164629,32.28923054822453),c(2835.6442025135157,3038.85600873824,2887.912765834375,78.17392659043833),c(2548.647260698933,2644.066054286067,2485.672506802373,110.46315713866287),c(2721.2268170724865,2752.3299661452916,2759.354923573735,365.3781351509618),c(2355.0911836611917,2276.3420777987,2279.582357611347,241.31951251830964),c(2418.9742238657664,2495.6698302721297,2523.444656332561,814.0284964526079),c(1934.6072921654081,2006.6156077356316,2020.4786652200573,701.8659061271964))
 targetgene="ENST00000293831"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
 
@@ -1141,77 +1106,7 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(3166.336338661363,3076.1027624880257,3184.0074777005084,486.5510789720104),c(2734.379272652289,2549.235301458836,2654.7397439402657,106.47926348323631),c(2404.594721085642,2367.556866621185,2467.8158220963705,196.6908617120893),c(2134.495103698235,2005.156199234501,2285.0924378220006,97.60599152629996),c(2237.679227194548,2191.6156455152486,2462.9151949319235,143.45122997047113),c(2244.760490571746,2078.783775458181,2046.3618859539547,349.0153636394968),c(1392.9856672002227,1509.8434137297459,1498.891822725767,507.25538020486186))
-targetgene="ENST00000245458"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2705.0426100896116,2645.8117326093775,2773.054885481907,76.90169029344845),c(2666.6014660419655,2507.1624007595906,2775.1551542666703,356.4097569369438),c(2131.460276536579,2181.097420340437,2191.9805216975137,193.73310439311052),c(2512.836889851382,2249.943985121021,2465.7155533116074,208.52189098800446))
-targetgene="ENST00000439602"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2643.334457802601,2642.94312574352,2731.0495097866497,41.40860246570301),c(2590.7307870005593,2583.6585838491283,2668.7415358386847,38.45084514672423),c(2360.0839227146835,2388.593316970808,2329.898171896942,606.3402503906512),c(2773.8320257538203,2661.110969227285,2749.9519288495158,548.6639826705649),c(2544.19677052183,2369.469271198423,2423.010088021429,242.5361001562605),c(2683.7988199580177,2551.147706036075,2603.633203511036,498.38210824792554),c(2762.7043261610806,2755.7749958005875,2823.461336316216,1007.1163671122767))
+targetmat=list(c(2491.4385679784186,2579.667692921528,2585.0729003028678,47.58412922896246),c(2441.8577009539727,2521.802498651942,2526.095333492574,44.18526285546515),c(2614.4372573275255,2597.4005750364013,2602.9649711329566,630.4897122837526),c(2224.4646686160163,2331.407343313306,2205.363397130978,696.7676065669503),c(2397.9977032015777,2312.7411516134393,2293.4984127014163,278.70704262678015),c(2529.5776964587617,2490.0699727621695,2464.467089522267,572.7089839342982),c(2603.948996995431,2689.7982239507396,2672.545246583303,1157.314000175837))
 targetgene="ENST00000451311"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
 
@@ -1246,7 +1141,42 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2918.4921204594352,2829.402572024267,2883.6690414794184,322.3955477686877),c(2578.5914783539342,2554.972515190552,2506.3207498170227,69.50729699600149),c(2606.916531862726,2504.293793893733,2529.4237064494146,298.73348921685744),c(3068.2102604344773,2924.0665985975697,3158.804252283354,340.1420916825604),c(2456.1867828337986,2237.513355368971,2275.2911834931074,97.60599152629996),c(577.6287697685746,585.1958006349616,639.1818001628329,109.4370208022151),c(787.0318439228563,813.7281476149549,826.1057220067282,551.6217399895437))
+targetmat=list(c(2984.386803586854,3002.4569349235007,3013.8199309350016,559.1135184403089),c(2577.2516070591905,2488.203353592183,2512.8419476925083,122.35918944590348),c(2266.4177099443937,2310.8745324434526,2335.9092472616276,226.0246138375717),c(2011.839027338103,1957.1501997309856,2162.9525625707665,112.16259032541151),c(2109.093804962978,2139.1455688046826,2331.2705622316043,164.84501911461996),c(2115.768152447038,2029.015037775471,1936.9823346796416,401.0662320726836),c(1312.9394979358142,1473.6958347044474,1418.7749498970622,582.9055830547902))
+targetgene="ENST00000245458"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2750.7846416447524,2761.663061995225,2729.534805523587,370.47643471120773),c(2430.4159624098693,2493.803211102143,2372.356058211809,79.87335977718699),c(2457.11335234611,2444.3378030974973,2394.224144781918,343.2855037232292),c(2891.899417022022,2854.060710909563,2989.9638364948833,390.86963295219164),c(2315.0450987568315,2183.9444288843615,2153.67519251072,112.16259032541151),c(741.8060489426749,794.2464568293127,781.9497622038923,633.8885786572499),c(544.436059056899,571.1854660159099,605.0170617730116,125.7580558194008))
 targetgene="ENST00000392367"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
 
@@ -1281,42 +1211,7 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(3479.935145365843,3167.898182195471,3387.0334602275857,175.9865604792378),c(2443.035865133288,2406.7611604545727,2601.5329347262727,62.11290369855452),c(3063.15221516505,3000.5627816871074,3106.2975326642822,470.28341371762707),c(2536.1038980907465,2490.906961853064,2641.4380416367676,122.74692873761964),c(2502.7207993125276,2453.6150725969146,2602.933113916115,591.5514637957573))
-targetgene="ENST00000230050"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2781.9248981849037,2801.67270565431,2834.662769834951,5.915514637957573),c(2835.5401780408306,2821.7529537153137,2919.373610820387,204.08525500953627),c(2761.692717107195,2633.3811028573273,2754.8525560139624,106.47926348323631),c(2617.0326224015803,2307.316122438174,2332.6985302766257,50.28187442263937),c(3002.455671931925,2943.190644369954,2910.2724460864147,862.1862584823162),c(2179.0059020691933,2086.4333937671345,2182.8793569635413,696.5518486195042),c(2582.637914569476,2375.2064849301387,2469.2160012862123,1777.6121487062508))
+targetmat=list(c(2622.065083023594,2734.5970840304185,2683.147955223356,6.797732746994638),c(2672.5994282600486,2754.1965853152783,2763.330939313755,234.521779771315),c(2602.9955187834225,2570.334597071595,2607.60365616298,122.35918944590348),c(2466.6481344661956,2252.0760285888737,2208.0140742909907,57.78072834945442),c(2829.923333241464,2872.7269026094295,2754.7162385437123,990.7695478744685),c(2053.7920686664806,2036.4815144554175,2066.202846230285,800.4330309586186),c(2434.2298752579036,2318.341009123399,2337.234585841634,2042.7186904718885))
 targetgene="ENST00000330752"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
 
@@ -1351,8 +1246,113 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2367.1651860918814,2439.272038267626,2472.716449260817,29.577573189787863),c(2847.6794866874557,2989.0883542236766,2885.06922066926,735.0026937662284),c(2363.1187498763397,2176.3164088973413,2326.3977239223373,332.7476983851135),c(2205.3077374702143,2187.7908363607717,2320.0969175680484,572.3260412223951),c(1639.8182763482648,1609.2884517461446,1635.4092937353535,156.76113790587567),c(2419.7688568939234,2320.702954478843,2378.904443541409,488.02995763149977),c(1382.8695766613685,1429.5224214857315,1428.8828632336715,159.71889522485446),c(2028.276153040266,2173.4478020314837,2149.975146002256,354.9308782774544),c(1982.753745615422,1899.0177451977677,1848.9366201862451,576.7626772008633),c(2572.5218240306217,2475.6077252351565,2439.812238299532,1656.3440986281205))
-targetgene="ENST00000493536"
+targetmat=list(c(3310.4763520937886,3285.2497391764755,3129.787056685579,428.25716306066215),c(2851.8533321176615,2862.460497174503,2905.8048366644643,304.19854042801),c(2884.2715913259535,3036.05607998326,2983.9998128848533,56.08129516270576),c(2370.346835053329,2508.736164462036,2304.101121341469,234.521779771315),c(1767.7486050639066,1637.025012078278,1693.782705248431,147.85068724713338),c(1268.1260219714109,1259.967939740978,1423.4136349270852,1436.021042802617))
+targetgene="ENST00000534624"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(3279.965049309514,3092.054655082859,3205.994025035958,202.23254922309047),c(2887.1320259619793,2928.7254777090284,2940.263639744636,540.4197533860737),c(2302.64988200072,2349.140225428179,2462.4790816522573,71.3761938434437),c(2390.369877505509,2431.2714689075906,2500.2512311824453,141.05295450013872),c(2358.905096509226,2394.872395092851,2463.804420232264,679.7732746994637))
+targetgene="ENST00000230050"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2185.3720619236647,2153.145212579582,2118.5537201405455,176.7410514218606),c(1762.027735791855,1823.6869290769414,1832.2805868591206,137.6540881266414),c(1969.8859860097255,2047.6812294753374,1990.6585471699088,210.72971515683378),c(2702.1572528323145,2737.3970127853986,2574.470191662815,533.6220206390791),c(3034.921148823309,3162.052873957358,2988.6384979148766,939.7865522720086),c(2111.954239599004,2149.4119742396088,2070.1788619703048,812.3290632658592))
+targetgene="ENST00000293308"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(1967.0255513736997,1997.2825118856983,2053.612129720222,197.1342496628445),c(2133.884238475201,1978.616320185832,1856.7993505892425,190.33651691584984),c(1733.4233894315978,1632.3584641533114,1748.1215870287015,69.67676065669504),c(2053.7920686664806,2011.282155660598,2200.062042810951,350.0832364702238),c(1158.4760275904243,575.8520139408765,1176.9006590458582,30.58979736147587),c(2608.716388055474,2786.8624207900443,2547.963420062683,1792.9020120198356))
+targetgene="ENST00000396466"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
 
 # set up color using RColorBrewer
@@ -1391,7 +1391,7 @@ for(i in 1:length(targetmat)){
 # gstablename='__GENE_SUMMARY_FILE__'
 startindex=21
 # outputfile='__OUTPUT_FILE__'
-targetgenelist=c("ENST00000314133","ENST00000284142","ENST00000286307","ENST00000417262","ENST00000291842","ENST00000368748","ENST00000442411","ENST00000292807","ENST00000240333","ENST00000521831")
+targetgenelist=c("ENST00000314133","ENST00000284142","ENST00000321253","ENST00000524320","ENST00000292807","ENST00000286307","ENST00000427575","ENST00000308388","ENST00000304425","ENST00000355710")
 # samplelabel=sub('.\\w+.\\w+$','',colnames(gstable)[startindex]);
 samplelabel='sym-03-02-TP6_vs_Sym-pool-1-1,Sym-pool-1-2,Sym-pool-1-3 pos.'
 
@@ -1497,7 +1497,7 @@ plotrankedvalues(pvec,targetgenelist,xlab='Genes',ylab='p value',main=paste('Dis
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2318.607951505381,2324.52776363332,2252.188226860716,3327.4769838511347),c(2185.075556392506,2003.2437946572625,2061.063767447295,3157.4059380098547),c(1725.8050459285255,1521.3178411931765,1626.308129001381,1387.1881826010508),c(2647.3808940181425,2498.556580162018,2774.455064671749,1674.0906425419932),c(1530.5644985286397,1543.3104938314186,1577.301857356914,1240.779195311601))
+targetmat=list(c(2185.3720619236647,2268.8756011187534,2131.8071059406116,3823.724670184484),c(2059.512937938532,1955.283580560999,1950.898389769711,3628.289853708388),c(2112.9077178110124,2136.3456400497025,2058.9134840402485,2289.136502550444),c(1626.6338296866368,1484.8955497243674,1539.3807606776625,1594.0683291702426),c(2495.252480826453,2438.737945587537,2626.1583962830723,1923.7583673994825),c(1442.612534768981,1506.3616701792137,1492.9939103774316,1425.8244436821253))
 targetgene="ENST00000314133"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
 
@@ -1532,7 +1532,7 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2082.9030419500787,2106.513641828138,2075.065559345714,2650.150557804993),c(1962.5215645377136,1805.3099209130844,1845.4361722116403,2548.1079303002243))
+targetmat=list(c(1963.2116385256654,2056.081015740277,1964.1517755697769,3045.3842706535975),c(1849.7477312966446,1762.0884964673824,1746.796248448695,2928.12338076794),c(2422.7881367138007,2561.934810806655,2602.3023018429535,2722.491965171352))
 targetgene="ENST00000284142"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
 
@@ -1567,8 +1567,8 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(1898.7901941429323,1769.9304362341734,1840.5355450471936,2632.40401389112),c(2025.2413258786098,1929.6162184335828,2044.961706764113,2527.403629067373))
-targetgene="ENST00000286307"
+targetmat=list(c(2449.4855266500413,2498.4697590271094,2394.224144781918,3393.768073937073),c(1653.3312196228771,1743.4223047675162,1793.1830987489259,2379.2064614481233),c(2574.391172423165,2779.395944110098,2698.389348893432,3434.5544704190406))
+targetgene="ENST00000321253"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
 
 # set up color using RColorBrewer
@@ -1602,8 +1602,8 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(1643.8647125638065,1665.7043867746784,1676.7145798356898,2077.8245165825974),c(2522.952980390236,2405.8049581659534,2450.3135822233467,2814.306089008315))
-targetgene="ENST00000417262"
+targetmat=list(c(3037.781583459335,3196.5853286021106,3227.199442316064,3689.4694484313395),c(1973.6998988577598,2079.4137553651103,2023.1293423800705,2448.8832221048183),c(1843.0733838125843,1842.3531207768076,1828.967240409104,2311.229133978177),c(1926.025988257331,1799.420879867115,1855.474012009236,2455.6809548518127),c(1879.3055558689105,1919.817816331253,1939.633011839655,2414.894558369845))
+targetgene="ENST00000524320"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
 
 # set up color using RColorBrewer
@@ -1637,112 +1637,7 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2476.4189639115066,2590.351999869463,2404.8077585534843,2987.3348921685742),c(2077.8449966806515,1898.0615429091486,1974.9527472720172,2120.71199770779))
-targetgene="ENST00000291842"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(3025.7226801712895,3099.051617414887,2994.283197476929,4095.01500812613))
-targetgene="ENST00000368748"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(1964.5447826454845,2007.0686038117394,2072.965290560951,2768.460850564144))
-targetgene="ENST00000442411"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2522.952980390236,2580.7899769832707,2660.3404606996332,2746.277670671803),c(2189.1219926080475,2262.3746148730706,2184.979625748304,198.16974037157868),c(3945.2753101531357,4054.297703745486,4113.026370160617,4960.159023927425))
+targetmat=list(c(2377.9746607493976,2519.0025698969625,2518.1433020125346,3155.8474277922605),c(2063.3268507865664,2208.2104780941877,2068.190854100295,227.72404702432036),c(3718.5650268334607,3957.232640371664,3893.182078769379,5699.898908355003),c(1829.7246888444643,2013.1487748305847,1999.935917229955,3227.223621635704))
 targetgene="ENST00000292807"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
 
@@ -1777,8 +1672,8 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2820.3660422325493,2781.5924575933063,2917.9734316305453,3898.3241464140406),c(2961.991309776508,2994.825567955392,2908.1721773016516,1431.5545423857327),c(3654.9435116880204,3471.970509976382,3641.165983183893,2821.7004823057623))
-targetgene="ENST00000240333"
+targetmat=list(c(1789.678603940104,1727.5560418226296,1742.157563418672,3024.991072412614),c(1908.8633804411763,1883.4187425165137,1935.656996099635,2904.331316153459),c(2047.1177211824204,2253.9426477588604,2182.832641270865,2369.0098623276313),c(2111.0007613869952,2016.882013170558,1987.3452007198923,1949.2498652007123))
+targetgene="ENST00000286307"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
 
 # set up color using RColorBrewer
@@ -1812,8 +1707,113 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2200.249692200787,2265.2432217389282,2259.1891228099253,3033.1801306127454))
-targetgene="ENST00000521831"
+targetmat=list(c(2052.838590454472,2093.41339914001,2072.8295391303177,2600.132775725449),c(3370.545479450329,2993.1238390735675,3119.8470173355295,3845.8173016122164),c(3198.9194012887847,3028.5896033033137,3064.8454662652557,4061.645316329296))
+targetgene="ENST00000427575"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(4208.65282780587,3886.301111912172,4136.38170820059,4420.225718733263),c(2541.972913214873,2520.8691890669493,2577.783538112831,3089.5695335090627),c(2448.5320484380327,2402.338871772798,2374.3440660818187,3344.4845115213616),c(2936.7128929864252,2948.324978993888,3059.5441119452294,3572.208558545682),c(2325.533359088926,2422.8716826426507,2380.9707589818518,2962.1120445029132))
+targetgene="ENST00000308388"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2377.9746607493976,2426.604920982624,2455.852388752224,3040.2859710933517),c(2405.6255288976463,2483.5368056672164,2415.4295620620233,3380.1726084430834),c(2305.5103166367458,2306.2079845184862,2373.6813967918156,2812.561924069031),c(2457.11335234611,2559.134882051675,2640.0744513731415,2739.486297038839),c(2995.828542130957,3037.922699153247,3043.6400489851503,3653.7813515096177))
+targetgene="ENST00000304425"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2110.0472831749867,2099.0132566499697,2108.613680790496,3016.4939064788705),c(1937.4677268014339,1860.0860028916807,1892.5834922494207,2030.822658164648),c(2286.4407523965738,2297.8081982535464,2329.2825543615945,3364.8777097623456),c(2348.4168361771317,2360.339940448099,2308.7398063714923,2438.6866229843263))
+targetgene="ENST00000355710"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-02-TP6")
 
 # set up color using RColorBrewer
@@ -1852,7 +1852,7 @@ for(i in 1:length(targetmat)){
 # gstablename='__GENE_SUMMARY_FILE__'
 startindex=27
 # outputfile='__OUTPUT_FILE__'
-targetgenelist=c("ENST00000286788","ENST00000293831","ENST00000439602","ENST00000230050","ENST00000456292","ENST00000392367","ENST00000493536","ENST00000245458","ENST00000534624","ENST00000451311")
+targetgenelist=c("ENST00000493536","ENST00000293831","ENST00000392367","ENST00000245458","ENST00000451311","ENST00000230050","ENST00000293308","ENST00000330752","ENST00000534624","ENST00000439602")
 # samplelabel=sub('.\\w+.\\w+$','',colnames(gstable)[startindex]);
 samplelabel='sym-03-03-TP6_vs_Sym-pool-1-1,Sym-pool-1-2,Sym-pool-1-3 neg.'
 
@@ -1958,217 +1958,7 @@ plotrankedvalues(pvec,targetgenelist,xlab='Genes',ylab='p value',main=paste('Dis
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(3699.1910394874185,3658.8674180121275,3683.231830448713,229.35694455762274),c(3955.0600175538407,3982.48565534533,4010.1780076634977,755.4444361366699),c(2770.922188827841,2698.3911334488616,2545.7033259068176,96.04322053350452))
-targetgene="ENST00000286788"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(3047.6177116206,3008.800463135811,3008.311817318608,60.206197946375966),c(2949.4354293392985,3072.0145211571653,2956.081826352761,38.70398439409884),c(2650.9216215951396,2672.916811559659,2544.3467027648476,18.635251745306846),c(2449.5983559072183,2301.1804106579625,2333.391804188503,110.37802956835594),c(2830.4266023316604,2782.3620463428992,2824.489381581665,289.56314250399873),c(2516.044950986483,2522.901360434355,2583.010462310994,643.6329256648288),c(2012.2409166541481,2028.510817103165,2068.1719799333564,483.0830644744929))
-targetgene="ENST00000293831"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2651.913361820203,2610.6462469416083,2686.792132671704,61.63967884986111),c(2614.2272332677844,2473.8397034625577,2688.827067384659,262.32700533778103),c(2089.596654209113,2152.1084529359628,2123.793528754129,96.04322053350452),c(2463.4827190581095,2220.039977973836,2389.0133530092758,222.18954004019702))
-targetgene="ENST00000439602"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(3411.58637421896,3125.793645145482,3281.671380425575,121.84587679623708),c(2395.0526435287175,2374.772896115659,2520.6057977803716,44.43790800803941),c(3002.9894014927354,2960.6822995673174,3009.668440460578,470.1817363431266),c(2486.2927442345735,2457.8003156063933,2559.269557326518,91.7427778230491),c(2453.5653168074728,2421.004072877545,2521.9624209223416,445.8125609838792))
-targetgene="ENST00000230050"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2693.5664512728763,2656.8774237034945,2602.003186298575,556.1905905522351),c(2105.4644978101314,2141.7300254996208,2220.7920834049883,151.94897576942506),c(2191.745897390669,2019.075883070127,2137.3597601738297,170.5842275147319),c(2373.234358577317,2424.77804649076,2344.244789324264,322.53320328415697),c(2352.4078138509803,2228.5314186035703,2367.307382737755,253.72611991687015))
-targetgene="ENST00000456292"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2861.1705493086333,2791.7969803759374,2793.9653608873386,210.7216928123159),c(2527.9458336872467,2521.0143736277473,2428.3554241264073,90.30929691956395),c(2555.714559989029,2471.0092232526463,2450.7397059689133,229.35694455762274),c(3007.948102618054,2885.2028273030132,3060.5418082844553,225.0565018471673),c(2407.9452664545447,2207.7745637308867,2204.5126057013476,116.11195318229652),c(566.2836685113448,577.4179628219242,619.2984643093324,118.9789149892668),c(771.5738950995205,802.9128862115318,800.4076537623355,478.78262176403746))
-targetgene="ENST00000392367"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2320.6721266489435,2406.851671827988,2395.796468719126,11.467847227881137),c(2791.7487335541778,2949.3603787276716,2795.3219840293086,468.74825543964147),c(2316.705165748689,2147.3909859194437,2254.029350383255,414.27598110720606),c(2161.9936906387593,2158.712906759089,2247.9245462443896,432.9112328525129),c(1607.6109048281785,1587.8993977602915,1584.5358298210301,98.9101823404748),c(2372.2426183522534,2289.858489818317,2304.9027182071322,372.705034906137),c(1355.708887662011,1410.5226379391777,1384.4339163804464,146.2150521554845),c(1988.4391512526204,2144.560505709532,2083.094834495027,369.83807309916665),c(1943.8108411247563,1873.7778989613423,1791.4208589714642,430.04427104554264),c(2521.995392336865,2442.704421153532,2363.91582488283,1513.75583408031))
+targetmat=list(c(2612.1094845612024,2859.8818168735947,2662.0732499198616,597.4648612296223),c(2171.3450067045164,2333.831898542719,2281.5925063617933,14.616877338951005),c(2167.6333058383548,2082.242807167083,2146.5832102605436,528.034693869605),c(2022.8769720580538,2093.2212402452924,2140.769412820777,551.7871195454004),c(1504.166776011975,1539.725239218893,1509.003424366124,126.07056704845242),c(2219.5971179646167,2220.388090067887,2195.0315222585996,475.04851351590764),c(1860.4900591634853,2079.4981988975305,1983.7968819470748,471.3942941811699),c(1268.4737710107154,1367.7297876602763,1318.440063840436,186.36518607162532),c(1818.7334244191675,1816.930674443685,1706.0265598248857,548.1329002106627),c(2359.713825662216,2368.596936623716,2251.231564176345,1929.4278087415325))
 targetgene="ENST00000493536"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
 
@@ -2203,7 +1993,77 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(3104.146904449228,3035.2182784283173,3084.9610248399167,424.31034743160205),c(2680.673828347049,2515.353413207925,2572.157477175234,65.94012156031654),c(2357.3665149762987,2336.0896665802034,2391.0482877222307,189.21947926003875),c(2092.5718748843037,1978.5056667280637,2214.008967695138,88.87581601607882),c(2193.729377840796,2162.4868803723043,2386.300106725336,91.7427778230491),c(2200.671559416242,2051.1546587824564,1982.7047219892427,385.60636303750323),c(1365.6262899126475,1489.7760838166967,1452.2650734789493,412.84250020372093))
+targetmat=list(c(2851.5141904286234,2917.518590534195,2864.9101828183902,76.73860602949277),c(2759.6495939911247,2978.8148418875317,2815.169915833719,49.33196101895964),c(2480.344103812467,2591.825075880644,2423.0615773961176,23.752425675795383),c(2648.2985680062775,2697.9499289700034,2689.8502821320803,369.07615280851286),c(2291.9752848547673,2231.3665231460964,2222.1625769775114,140.68744438740342),c(2354.1462743629736,2446.3608375943672,2459.8822945146403,820.3722406486252),c(1882.7602643604546,1966.9692598458823,1969.5853770943115,615.735957903311))
+targetgene="ENST00000293831"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2677.0642497190297,2707.0986232018445,2660.7812949332465,268.5851211032247),c(2365.281376961458,2444.531098747999,2312.5994260405496,115.10790904423916),c(2391.2632830245893,2396.04301931924,2333.916683319694,292.3375467790201),c(2814.3971817670076,2797.6706960970737,2914.6504498030613,286.85621777691347),c(2253.0024257600708,2140.794450250867,2099.4268532491024,147.9958830568789),c(721.9258184684247,778.5538791296958,762.2534421027509,610.2546289012045),c(529.8452986445636,559.9000869886884,589.7774513896709,151.65010239161668))
+targetgene="ENST00000392367"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2904.405927771426,2943.1349343833504,2937.9056395621283,540.8244615411871),c(2508.1818603086786,2439.041882208894,2449.5466546217217,84.04704469896828),c(2205.6782397165107,2265.2166918039093,2277.0706639086416,241.17847609269157),c(1957.9222069002262,1918.4811804171234,2108.470538155406,113.28079937687029),c(2052.5705789873464,2096.880717938029,2272.54882145549,116.93501871160804),c(2059.066055503129,1988.9261260023015,1888.192212937577,491.49250052222754),c(1277.7530231761193,1444.5788192077434,1383.0378131711777,526.2075842022361))
 targetgene="ENST00000245458"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
 
@@ -2238,7 +2098,147 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(3443.3220614209968,3321.096779629368,3203.665549762297,269.4944098552067),c(2966.2950131653806,2893.6942679327476,2974.396238769357,260.89352443429584),c(3000.0141808175445,3069.184040947254,3054.4370041455904,60.206197946375966),c(2465.4661995082365,2536.1102680806084,2358.4893323149495,213.5886546192862),c(1838.6863772680092,1654.887429394861,1733.7643754377368,174.88467022518734))
+targetmat=list(c(2424.6685908200434,2528.699085680939,2519.95820139223,40.196412682115266),c(2376.416479559943,2471.977181443523,2462.46620448787,56.640399688435146),c(2544.3709437537536,2546.0816047214375,2537.39959371153,756.4234022907145),c(2164.8495301887338,2285.34381911396,2149.8130977270807,654.1052609180574),c(2333.731919599085,2267.0464306502777,2235.728104336967,367.249043141144),c(2461.785599481659,2440.8716210552625,2402.3902976102804,507.9364875285474),c(2534.1637663718093,2636.6536776166663,2605.227230508809,1300.9020831666394))
+targetgene="ENST00000451311"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(3192.062744898947,3030.962399009027,3125.2391126212788,155.30432172635443),c(2809.7575556843058,2870.8602499518042,2866.202137805005,599.2919708969912),c(2240.9393979450456,2302.7263381544585,2400.452365130358,56.640399688435146),c(2326.3085178667616,2383.234847394662,2437.2730822488807,116.93501871160804),c(2295.686985720929,2347.554939890481,2401.744320116973,568.2311065517204))
+targetgene="ENST00000230050"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2126.8045963105774,2110.603759285791,2065.190046103809,133.37900571792792),c(1714.8058001666436,1787.6548529017925,1786.1277689950055,215.59894074952732),c(1917.093497372449,2007.2235144659842,1940.516389895478,175.40252806741205),c(2629.7400636754696,2683.312018199057,2509.6225614993114,422.0623331622103),c(2953.5859642480664,3099.577605747837,2913.358494816446,915.3819433518066),c(2055.3543546369674,2106.9442815930543,2018.0336890923677,814.8909116465185))
+targetgene="ENST00000293308"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2551.794345486077,2680.5674099295047,2615.5628704017277,7.308438669475502),c(2600.974381962718,2699.779667816372,2693.7261470919248,160.78565072846106),c(2533.235841155269,2519.550391449098,2541.9214361646823,195.5007344084697),c(2400.542535189993,2207.579918143309,2152.3970077003105,67.60305769264839),c(2754.082042691882,2815.9680845607563,2685.3284396789286,1048.7609490697346),c(1998.7509164280036,1996.2450813877745,2014.1578241325233,824.0264599833629),c(2368.99307782762,2272.5356471893824,2278.362618895256,1819.8012286994))
+targetgene="ENST00000330752"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(3221.7563518282395,3220.3403696081423,3050.951700890926,343.4966174653486),c(2775.4243226723115,2805.904520905731,2832.6113081530193,332.53395946113534),c(2806.9737800346848,2976.0702336179793,2908.8366523632944,76.73860602949277),c(2306.8220883194135,2459.169009518945,2246.0637442298857,272.2393404379625),c(1720.3733514658861,1604.6809682649664,1651.1184728937553,222.9073794190028),c(1234.140537998721,1235.0737212985773,1387.5596556243297,1474.4775015666826))
 targetgene="ENST00000534624"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
 
@@ -2273,8 +2273,8 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2591.4172080913204,2607.815766731697,2646.093438412602,31.536579876673127),c(2539.8467163880105,2549.3191757268614,2585.7237085949346,44.43790800803941),c(2313.729945073498,2356.846521452887,2257.42090823818,513.1861634476809),c(2719.3516971245313,2625.742141394469,2664.4078508291977,593.4610940428488),c(2494.2266660350824,2337.9766533868105,2347.6363471791888,288.12966160051354),c(2631.0868170938666,2517.2404000145325,2522.6407324933266,398.5076911688695),c(2708.442554648831,2719.147988321545,2735.630565782626,1020.6384032814212))
-targetgene="ENST00000451311"
+targetmat=list(c(2481.272029029007,2531.4436939504913,2558.716850990675,78.56571569686164),c(2446.0108708004723,2398.7876275887925,2560.654783470597,334.36106912850425),c(1955.1384312506052,2086.8171542830037,2022.5555315455197,122.41634771371467),c(2304.9662378863327,2152.687752752261,2275.132731428719,283.2019984421757),c(3145.6664840719277,3318.231397888844,3336.473752932804,2779.03380406806))
+targetgene="ENST00000439602"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
 
 # set up color using RColorBrewer
@@ -2313,7 +2313,7 @@ for(i in 1:length(targetmat)){
 # gstablename='__GENE_SUMMARY_FILE__'
 startindex=33
 # outputfile='__OUTPUT_FILE__'
-targetgenelist=c("ENST00000284142","ENST00000286307","ENST00000291842","ENST00000521831","ENST00000442411","ENST00000314133","ENST00000372114","ENST00000419003","ENST00000563280","ENST00000380013")
+targetgenelist=c("ENST00000284142","ENST00000304425","ENST00000376708","ENST00000562866","ENST00000286307","ENST00000521831","ENST00000292807","ENST00000215375","ENST00000347968","ENST00000328709")
 # samplelabel=sub('.\\w+.\\w+$','',colnames(gstable)[startindex]);
 samplelabel='sym-03-03-TP6_vs_Sym-pool-1-1,Sym-pool-1-2,Sym-pool-1-3 pos.'
 
@@ -2419,7 +2419,7 @@ plotrankedvalues(pvec,targetgenelist,xlab='Genes',ylab='p value',main=paste('Dis
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2041.9931234060577,2078.5159674782662,2010.515496399629,2451.252344959593),c(1923.9760366234832,1781.31554543757,1788.0293011165393,2369.54393346094))
+targetmat=list(c(1910.5980208566664,2015.4573392746413,1914.6772901631812,3124.3575312007774),c(1800.1749200883598,1727.2734709716399,1702.7966723583488,3020.2122801607516),c(2357.8579752291353,2511.3165666404407,2536.7536162182228,2737.0102817185757))
 targetgene="ENST00000284142"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
 
@@ -2454,7 +2454,112 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(1861.4964024444732,1746.4062895153295,1783.281120119644,1998.272379458288),c(1985.4639305774294,1903.9696878670638,1981.3480988472727,2378.144818881851))
+targetmat=list(c(2314.245490051737,2378.6605002787414,2393.992590197284,2985.497196480743),c(2341.1553213314082,2434.4675350929733,2354.5879631055313,3067.717131512342),c(2243.723173594667,2260.6423446879885,2313.8913810271642,2537.8553279753683),c(2391.2632830245893,2508.5719583708883,2573.5743333367454,3120.7033118660397),c(2915.5410303699105,2977.8999724643477,2966.974626760962,3654.219334737751))
+targetgene="ENST00000304425"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(2319.813041350979,2458.2541400957607,2422.4155999028103,3614.0229220556357),c(2033.084149439998,2181.963574294153,2031.5992164518234,2400.8221029227025),c(2136.0838484759815,2212.1542652592298,2148.5211427404656,2656.617456354345),c(1655.4185863080586,1672.381305580592,1726.0518621174158,1967.797111756279),c(3284.8552665529864,3371.293824433524,3346.8093928257226,4100.034093575757))
+targetgene="ENST00000376708"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(1652.6348106584376,1622.978356728649,1772.5622416355498,2406.303431924809),c(2368.99307782762,2320.108857194957,2340.3764582527683,2848.463971428077),c(1699.9589967019974,1803.2076330959228,1730.5737045705675,2150.5080784931665),c(1518.0856542600807,1567.171321914417,1463.1390223412973,1684.5951133141034),c(2009.8860190264882,1929.459613495333,1960.5416921880078,2199.840039512126),c(1141.3480163446816,1180.1815559075294,1191.1824976588753,1596.8938492803973))
+targetgene="ENST00000562866"
+collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
+
+# set up color using RColorBrewer
+#library(RColorBrewer)
+#colors <- brewer.pal(length(targetgenelist), "Set1")
+
+colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
+          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
+          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
+          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
+
+
+## code
+
+targetmatvec=unlist(targetmat)+1
+yrange=range(targetmatvec[targetmatvec>0]);
+# yrange[1]=1; # set the minimum value to 1
+for(i in 1:length(targetmat)){
+  vali=targetmat[[i]]+1;
+  if(i==1){
+    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
+    axis(1,at=1:length(vali),labels=(collabel),las=2)
+    # lines(0:100,rep(1,101),col='black');
+  }else{
+    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
+  }
+}
+
+
+
+
+# parameters
+# Do not modify the variables beginning with "__"
+targetmat=list(c(1741.715631446315,1693.4233023138272,1698.2748299051968,2546.9908763122125),c(1857.706283513864,1846.206495985577,1886.9002579509622,3031.1749381649647),c(1992.2554399122207,2209.4096569896774,2127.8498629546284,2029.9188404468207),c(2054.426429420427,1977.0328235009079,1937.2865024289408,1969.624221423648))
 targetgene="ENST00000286307"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
 
@@ -2489,42 +2594,7 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2427.780070955818,2555.923629549988,2330.000246333578,2591.733473501137),c(2037.0344222807394,1872.8344055580385,1913.5169417487698,2034.1094020454166))
-targetgene="ENST00000291842"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2157.0349895134414,2235.135872426697,2188.911439568692,2831.1247843831557))
+targetmat=list(c(2018.2373459753517,2167.325663523207,2084.5693709030315,3608.541593053529),c(2239.0835475119648,2396.957888742424,2359.1098055586835,2459.2896122785064),c(2258.5699770593133,2227.70704545336,2151.1050527136954,2461.1167219458753))
 targetgene="ENST00000521831"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
 
@@ -2559,8 +2629,8 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(1925.9595170736104,1980.3926535346714,2008.480561686674,2532.960756458246))
-targetgene="ENST00000442411"
+targetmat=list(c(2314.245490051737,2469.2325731739706,2454.714474568181,2810.0946684133305),c(2008.0301685934076,2164.5810552536545,2016.0957566124455,168.09408939793656),c(3618.908344507527,3879.0463543007168,3795.1177731810694,5678.656846182465),c(1780.6884905410116,1973.3733458081713,1949.5600748017816,2861.253739099659))
+targetgene="ENST00000292807"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
 
 # set up color using RColorBrewer
@@ -2594,8 +2664,8 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2273.0685958458885,2293.6324634315324,2182.1283238588417,2431.183612310801),c(2142.158886137486,1976.6186799214563,1996.9492649799283,2413.9818414689794),c(1691.9088239585888,1501.0980046563423,1575.7177793982248,1066.5097921929457),c(2595.384168991575,2465.3482628328234,2688.148755813674,1179.754783568272),c(1500.5029605213042,1522.7983529323294,1528.2359694292727,1333.137240241182))
-targetgene="ENST00000314133"
+targetmat=list(c(1623.8691289456854,1665.9772196183033,1754.474871822942,2194.3587105100196),c(3091.846821512585,3177.3415067184883,3005.733276359407,4522.096426737967),c(1686.968043670432,1846.206495985577,1903.695672776955,2265.6159875374055),c(1926.372749537853,1851.6957125246818,1873.3347305915065,2205.3213685142327))
+targetgene="ENST00000215375"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
 
 # set up color using RColorBrewer
@@ -2629,8 +2699,8 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2389.1022021783356,2262.497181122507,2309.650899204027,2790.987319085572))
-targetgene="ENST00000372114"
+targetmat=list(c(1809.4541722537635,1893.7797059911518,1839.743900939521,2548.8179859795814),c(942.7720200050379,1034.7173176212525,1007.7248895595691,1370.3322505266567),c(2195.4710623345663,2350.2995481600333,2335.2086383063092,2609.112605002754),c(2253.9303509766114,2312.789901809484,2384.94890529098,2923.375467790201))
+targetgene="ENST00000347968"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
 
 # set up color using RColorBrewer
@@ -2664,78 +2734,8 @@ for(i in 1:length(targetmat)){
 
 # parameters
 # Do not modify the variables beginning with "__"
-targetmat=list(c(2028.1087602551665,2026.6238302965576,1970.4951137115122,2544.428603686127),c(2751.087384326568,2728.582922354583,2823.132758439695,2077.113829149971))
-targetgene="ENST00000419003"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2775.8808899531596,2647.4424896704563,2894.3554733931232,3180.8941248335304))
-targetgene="ENST00000563280"
-collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
-
-# set up color using RColorBrewer
-#library(RColorBrewer)
-#colors <- brewer.pal(length(targetgenelist), "Set1")
-
-colors=c( "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",  "#A65628", "#F781BF",
-          "#999999", "#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854", "#FFD92F", "#E5C494", "#B3B3B3", 
-          "#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5",
-          "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F")
-
-
-## code
-
-targetmatvec=unlist(targetmat)+1
-yrange=range(targetmatvec[targetmatvec>0]);
-# yrange[1]=1; # set the minimum value to 1
-for(i in 1:length(targetmat)){
-  vali=targetmat[[i]]+1;
-  if(i==1){
-    plot(1:length(vali),vali,type='b',las=1,pch=20,main=paste('sgRNAs in',targetgene),ylab='Read counts',xlab='Samples',xlim=c(0.7,length(vali)+0.3),ylim = yrange,col=colors[(i %% length(colors))],xaxt='n',log='y')
-    axis(1,at=1:length(vali),labels=(collabel),las=2)
-    # lines(0:100,rep(1,101),col='black');
-  }else{
-    lines(1:length(vali),vali,type='b',pch=20,col=colors[(i %% length(colors))])
-  }
-}
-
-
-
-
-# parameters
-# Do not modify the variables beginning with "__"
-targetmat=list(c(2000.3400339533844,1936.048463579393,1857.2170813570121,2217.594957691515))
-targetgene="ENST00000380013"
+targetmat=list(c(2686.343501884434,2589.995337034276,2881.705597644383,3325.3395946113537),c(2178.7684084368393,2188.3676602564424,2132.3717054077806,2674.888553028034),c(3101.1260736779886,3092.258650362364,3122.655202648049,4233.413099293684))
+targetgene="ENST00000328709"
 collabel=c("Sym-pool-1-1","Sym-pool-1-2","Sym-pool-1-3","sym-03-03-TP6")
 
 # set up color using RColorBrewer
