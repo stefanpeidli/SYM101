@@ -1,12 +1,24 @@
 """
 Author: Stefan Peidli
-Aim: Snakemake workflow for SYMPHONY.
+Title: Snakemake workflow for SYMPHONY experiment pooled_screen_1.
 Date: 03.04.2024
 Run: snakemake
 Create DAG: snakemake --forceall --dag | dot -Tpdf > snake_dag.pdf
 Create Rulegraph: snakemake --forceall --rulegraph | dot -Tpdf > snake_rulegraph.pdf
 Description:
-...
+    This snakemake workflow starts does the following:
+    - Upstream processing
+        - Download FASTQ files from BaseSpace
+        - Run FastQC on the FASTQ files
+        - Trim the FASTQ files with a custom script
+        - Align the trimmed FASTQ files to the guides with HISAT2
+        - Count the number of reads per guide using samtools
+        - Merges the counts into a single table "pooled_screen_1_counts.csv"
+    - Downstream processing
+        - Runs MAGeCK
+        - Runs BAGEL2
+        - TODO: get scripts for Gscreend by Fernanda
+    All configuration is done in the configuration/config.yaml file.
 """
 
 import pandas as pd

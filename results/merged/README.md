@@ -1,0 +1,9 @@
+- Each table contains merged results from BAGEL / Gscreend / MAGeCK (depending on if it could be run or not).
+- Results are partially available by gene / guide / transcript level.
+- Results are aggregates for all cell lines, except if marked as "perline".
+- If not otherwise noted "_filtered" , results are derived from unfiltered guides.
+- The guide filters are marked in the guide-wise aggregate table (gene_results.csv)
+- Missing / Unavailable:
+    - Gscreend per transcript (I told Fernanda to use a wrong column)
+    - Gscreend does not run on guide level (as it needs multiple for stats)
+    - Bagel only runs on genes (as it needs annotation)
