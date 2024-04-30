@@ -1,0 +1,130 @@
+
+name: SYMPHONY pooled screen 1
+datasets:
+  transcript_results:
+    path: "../results/merged/transcript_results.csv"
+    offer-excel: true
+    # links:
+    #   link to oscar plot:
+    #     column: age
+    #     view: oscar-plot
+    #   link to movie:
+    #     column: movie
+    #     table-row: movies/Title
+  gene_results:
+    path: "../results/merged/gene_results.csv"
+    offer-excel: true
+    # links:
+    #   link to oscar entry:
+    #     column: Title
+    #     table-row: oscars/movie
+default-view: gene_results
+webview-controls: true
+views:
+  gene_results:
+    dataset: gene_results
+    desc: |
+      ### Gene-wise Results merged across Cell Lines.
+      Bla.
+    page-size: 50
+    render-table:
+      # add-columns:
+      #   birth_season:
+      #     value: |
+      #       function getSeasonEmoji(row) {
+      #           var month = row.birth_mo;
+      #           const seasons = ["❄️", "🌸", "☀️", "🍁"];
+      #           return (month < 1 || month > 12) ? "Invalid month" : seasons[Math.floor((month % 12) / 3)];
+      #       }
+      columns:
+        index(0):
+          label: "Gene"
+        # Symmetric with 0 as center
+        regex('.+_(lfc|LFC)'):
+          plot:
+            heatmap:
+              type: quantitative
+              scale: linear
+              color-scheme: blueorange
+              domain:
+                - -5
+                - 5
+        # Anything between 0 and 1
+        regex('.+_(FDR|fdr|p-value|pvalue)'):
+          plot:
+            heatmap:
+              scale: linear
+              color-scheme: blues
+              domain:
+                - 0
+                - 1
+        # Anything else (scores etc)
+        regex('.+_(score|specificity)'):
+          plot:
+            heatmap:
+              scale: linear
+              color-scheme: oranges
+              domain:
+                - 0
+                - 1
+        # Anything else (BF etc)
+        regex('.+_(Bayesfactor|BF)'):
+          plot:
+            heatmap:
+              scale: linear
+              color-scheme: oranges
+              domain:
+                - 500
+                - 2000
+
+  # oscar-plot:
+  #   dataset: oscars
+  #   desc: |
+  #     ## My beautiful oscar scatter plot
+  #     *So many great actors and actresses*
+  #   render-plot:
+  #     spec-path: ".examples/specs/oscars.vl.json"
+  # movies:
+  #   dataset: movies
+  #   render-table:
+  #     columns:
+  #       Genre:
+  #         ellipsis: 15
+  #       imdbID:
+  #         link-to-url:
+  #           IMDB:
+  #             url: "https://www.imdb.com/title/{value}/"
+  #       Title:
+  #         link-to-url:
+  #           Wikipedia:
+  #             url: "https://de.wikipedia.org/wiki/{value}"
+  #           Letterboxd:
+  #             url: "https://letterboxd.com/search/{value}"
+  #             new-window: false
+  #       imdbRating:
+  #         precision: 1
+  #         plot:
+  #           bars:
+  #             scale: linear
+  #             domain:
+  #               - 1
+  #               - 10
+  #             color:
+  #               scale: linear
+  #               range:
+  #                 - red
+  #                 - green
+  #       Rated:
+  #         plot-view-legend: true
+  #         plot:
+  #           heatmap:
+  #             scale: ordinal
+  #             color-scheme: tableau20
+  #       Runtime:
+  #         custom-path: ".examples/specs/time-formatter.js"
+  # movies-plot:
+  #   dataset: movies
+  #   desc: |
+  #     All movies with its *runtime* and *ratings* plotted over *time*.
+  #   render-plot:
+  #     spec-path: ".examples/specs/movies.vl.json"

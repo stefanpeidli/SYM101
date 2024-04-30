@@ -49,9 +49,12 @@ rule all:
         TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv',
         TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts_filtered.csv',  # removed "bad" guides
         # Analysis (all analysis is run per line and on all lines jointly. Also with all and with filtered guides only)
-        ## MAGeCK
+        ## MAGeCK Test
         expand('../results/mageck/{line}/{feature}_pooled_screen_1_{counts}_mageck.sgrna_summary.txt', 
             line=['alllines', 'H1975', 'H1299', 'A549'], counts=['counts', 'counts_filtered'], feature=['gene', 'transcript']),
+        ## MAGeCK MLE
+        expand('../results/mageck/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.sgrna_summary.txt', 
+            feature=['gene', 'transcript'], time_key=['alltimes', 'TP1', 'TP5','TP6'], counts=['counts', 'counts_filtered']),
         ## BAGEL2
         expand('../results/bagel2/pooled_screen_1_{counts}_bagel_pr_gene.tsv', counts=['counts', 'counts_filtered']),
         # Target alignment
@@ -294,13 +297,23 @@ rule merge_counts:
         df.to_csv(output[0])
 
 ### DOWNSTREAM ###
-rule mageck_prepare_inputs:
+rule mageck_define_controls:
+    input:
+        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_{counts}.csv'
+    output:
+        control=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_{counts}_control_guides.txt',
+    run:
+        # Define control guides
+        df = pd.read_csv(input.counts, index_col=0)
+        with open(output.control, 'w') as file:
+            file.write('\n'.join([x for x in df.index if 'control' in x.lower()]))
+
+rule mageck_test_prepare_inputs:
     input:
         counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_{counts}.csv'
     output:
         gene_counts=TEMPDIR / 'pooled_screen_1/mageck/{line}/gene_pooled_screen_1_{counts}.tsv',
         transcript_counts=TEMPDIR / 'pooled_screen_1/mageck/{line}/transcript_pooled_screen_1_{counts}.tsv',
-        control=TEMPDIR / 'pooled_screen_1/mageck/{line}/pooled_screen_1_{counts}_control_guides.txt',
         day0=TEMPDIR / 'pooled_screen_1/mageck/{line}/pooled_screen_1_{counts}_day0_samples.txt',
     run:
         line = wildcards.line
@@ -332,10 +345,6 @@ rule mageck_prepare_inputs:
             'transcript_length', 'gRNA_occurence', 'transcript_per_gene'], axis=1, inplace=True)
         sdf.rename(dict(Gene='gene'), axis=1, inplace=True)
         sdf.to_csv(output.gene_counts, sep='\t')
-
-        # Define the control guides
-        with open(output.control, 'w') as file:
-            file.write('\n'.join([x for x in df.index if 'control' in x.lower()]))
         
         # Define the control samples
         # Using plasmid pools as Day0
@@ -343,11 +352,11 @@ rule mageck_prepare_inputs:
         with open(output.day0, 'w') as file:
             file.write(day0)
 
-rule mageck:
+rule mageck_test:
     input:
     # I should run this per cell line I guess and only use TP6
         counts=TEMPDIR / 'pooled_screen_1/mageck/{line}/{feature}_pooled_screen_1_{counts}.tsv',
-        control=TEMPDIR / 'pooled_screen_1/mageck/{line}/pooled_screen_1_{counts}_control_guides.txt',
+        control=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_{counts}_control_guides.txt',
         day0=TEMPDIR / 'pooled_screen_1/mageck/{line}/pooled_screen_1_{counts}_day0_samples.txt',
     output:
         '../results/mageck/{line}/{feature}_pooled_screen_1_{counts}_mageck.sgrna_summary.txt'
@@ -364,6 +373,116 @@ rule mageck:
         --pdf-report \
         --sort-criteria neg \
         --adjust-method fdr
+        """
+
+rule mageck_mle_prepare_counts:
+    input:
+        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_{counts}.csv'
+    output:
+        counts_prepared=TEMPDIR / 'pooled_screen_1/mageck/mageck_mle_{counts}_{time}_{feature}.csv',
+    run:
+        # Prepare counts for MAGeCK MLE module
+        df = pd.read_csv(input.counts, index_col=0)
+        time_key = wildcards.time
+        feature_key = wildcards.feature
+
+        # Remove initial time points if TP6 is selected
+        sdf = df.loc[:, ~df.columns.str.contains('TP1|TP2|TP3|TP4|TP5')].copy() if time_key == 'TP6' else df.copy()
+
+        # Define the count matrix (transcripts)
+        sdf.drop(['ensembl_gene_id', 'transcript_biotype',
+                'GuideName', 'GuideSeq', 'MatchPos', 'Guide_Score', 'Region',
+                'transcript_length', 'gRNA_occurence', 'transcript_per_gene'], axis=1, inplace=True)
+        sdf.index.name = 'sgRNA'
+        if feature_key == 'transcript':
+            sdf.drop(['Gene'], axis=1, inplace=True)
+            sdf.rename(dict(Transcript_ID='gene'), axis=1, inplace=True)  # mageck wants this be called "gene"
+        elif feature_key == 'gene':
+            sdf.drop(['Transcript_ID'], axis=1, inplace=True)
+            sdf.rename(dict(Gene='gene'), axis=1, inplace=True)
+        
+        # Save as txt (required by mageck)
+        sdf.to_csv(output.counts_prepared)
+
+rule mageck_mle_prepare_designs:
+    input:
+        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv'
+    output:
+        design_matrix=TEMPDIR / 'pooled_screen_1/mageck/mageck_mle_designmat_{time}.txt', 
+    params:
+        time_model='categorical'  # 'linear' or 'categorical'
+    run:
+        # Prepare design matrix for MAGeCK MLE module
+        df = pd.read_csv(input.counts, index_col=0)
+        time_key = wildcards.time
+
+        # Remove unused columns
+        tps = [x for x in ['TP1', 'TP2', 'TP3', 'TP4', 'TP5', 'TP6'] if x != time_key]
+        sdf = df.loc[:, ~df.columns.str.contains('|'.join(tps))].copy()
+        sdf.drop(['Gene', 'Transcript_ID', 'ensembl_gene_id', 'transcript_biotype',
+                    'GuideName', 'GuideSeq', 'MatchPos', 'Guide_Score', 'Region',
+                    'transcript_length', 'gRNA_occurence', 'transcript_per_gene'], axis=1, inplace=True)
+        
+        if 'TP' in time_key:
+            # We only model cell lines, no time
+            design_mat = pd.DataFrame(0, index=sdf.columns, columns = ['baseline', 'H1975', 'H1299', 'A549'])
+            design_mat['baseline'] = 1
+            for i, line in cell_line_dict.items():
+                design_mat[line] = (design_mat.index.str.split('-').str[1] == f'0{i}').astype(int)
+            design_mat.index.name ='Samples'
+        else:
+            # We model both cell lines and time points
+            if params.time_model=='linear':
+                # Linear time model (TP1=1, ..., TP6=6)
+                design_mat = pd.DataFrame(0, index=sdf.columns, columns = ['baseline', 'H1975', 'H1299', 'A549', 'time'])
+                design_mat['baseline'] = 1
+                for i, line in cell_line_dict.items():
+                    design_mat[line] = (design_mat.index.str.split('-').str[1] == f'0{i}').astype(int)
+                design_mat['time'] = [int(x[-1]) if 'TP' in x else 0 for x in design_mat.index]
+            elif params.time_model=='categorical':
+                # Treat each time point as a separate category (TP1=A, ..., TP6=F)
+                design_mat = pd.DataFrame(0, index=sdf.columns[1:], columns = ['baseline', 'H1975', 'H1299', 'A549', 'TP1', 'TP2', 'TP3', 'TP4', 'TP5', 'TP6'])
+                design_mat['baseline'] = 1
+                for i, line in cell_line_dict.items():
+                    design_mat[line] = (design_mat.index.str.split('-').str[1] == f'0{i}').astype(int)
+
+                for x in design_mat.index:
+                    if 'TP' in x:
+                        key = x.split('-')[-1]
+                        design_mat.loc[x, key] = 1
+            else:
+                raise ValueError('Invalid time model. Choose "linear" or "categorical"')
+        design_mat.index.name ='Samples'
+        design_mat.to_csv(output.design_matrix, sep='\t')
+
+rule mageck_mle:
+    input:
+        counts_prepared=TEMPDIR / 'pooled_screen_1/mageck/mageck_mle_{counts}_{time_key}_{feature}.csv',
+        design_matrix=TEMPDIR / 'pooled_screen_1/mageck/mageck_mle_designmat_{time_key}.txt',
+        control=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_{counts}_control_guides.txt'
+    output:
+        guide_summary='../results/mageck/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.sgrna_summary.txt',
+        feature_summary='../results/mageck/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.gene_summary.txt',
+        log=temp('../results/mageck/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.log')
+    params:
+        output_prefix=lambda wildcards, output: output.feature_summary.replace('.gene_summary.txt', '')
+    resources:
+        time='23:00:00',
+        mem_mb=64000,
+        disk_mb=64000
+    conda: "mageck_env"  # "../environments/mageck_env.yaml"
+    threads: 16
+    shell:
+        """
+        mkdir -p $(dirname {output.feature_summary})
+        mageck mle \
+            --count-table {input.counts_prepared} \
+            --design-matrix {input.design_matrix} \
+            --output-prefix {params.output_prefix} \
+            --threads {threads} \
+            --norm-method control \
+            --control-sgrna {input.control} \
+            --adjust-method fdr
         """
 
 rule mageck_filter_guides:
@@ -626,6 +745,24 @@ rule align_guides_to_genome_bwa:
     shell:
         """
         bwa mem -t {threads} {input.genome_fasta} {input.guide_fasta} > {output}
+        """
+
+rule render_datavzrd:
+    input:
+        gene_results="../results/merged/gene_results.csv",
+        transcript_results="../results/merged/transcript_results.csv",
+        guide_results="../results/merged/guide_results.csv",
+        config="../configuration/datavzrd-config.yaml"
+    output:
+        website=directory('../results/datavzrd/pooled_screen_1_online/')
+    shell:
+        """
+        datavzrd \
+            --verbose \
+            --overwrite-output \
+            --output {output.website} \
+            {input.config}
+        # datavzrd --verbose --overwrite-output --output ../results/datavzrd/pooled_screen_1_online/ ../configuration/datavzrd-config.yaml
         """
 
 onsuccess: 
