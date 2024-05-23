@@ -60,6 +60,8 @@ rule all:
         # Target alignment
         # expand(TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_{feature}_annotated.csv', feature=['genome', 'transcriptome']),
         # "../results/tables/cas_off_finder.txt"
+        # CNE correction
+        expand(TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_corrected_logFCs.csv', line=cell_lines),
 
 ### UPSTREAM ###
 rule download_fastq_bs:
@@ -273,7 +275,7 @@ rule count:
     threads: 4
     conda: "samtools_env"  # "../environments/samtools_env.yaml"
     script:
-        "../../scripts/count_reads.sh"
+        "scripts/count_reads.sh"
 
 rule merge_counts:
     input:
@@ -499,7 +501,7 @@ rule mageck_filter_guides:
     log:
         notebook="../results/reports/mageck_filter_guides_report.ipynb"
     notebook: 
-        '../../scripts/mageck_filter_guides.py.ipynb'
+        'scripts/mageck_filter_guides.py.ipynb'
 
 rule bagel2_prepare:
     input:
@@ -642,6 +644,7 @@ rule cas_off_finder:
         cas-offinder {input} C {output}
         """
 
+### Align Guides and CNV effect ###
 rule align_guides_to_genome_hisat2:
     input:
         guide_fasta='../resources/pooled_screen_1_guides.fa',
@@ -716,6 +719,71 @@ rule annotate_exon_number:
         """
         python scripts/annotate_exon_number.py -i {input.sam} -g {input.gtf} -o {output.annotated_csv} -x {output.series}
         """
+
+rule crispr_cleanr_prepare_inputs:
+    input:
+        guides='/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/guides_aligned_to_genome_annotated.csv',
+        counts='/scratch/peidli/SYMPHONY/pooled_screen_1/pooled_screen_1_counts.csv'
+    output:
+        guides='/scratch/peidli/SYMPHONY/pooled_screen_1/guide_alignment_genome_annotated_for_crisprcleanr.csv',
+        counts=expand('/scratch/peidli/SYMPHONY/pooled_screen_1/crisprcleanr/pooled_screen_1_counts_for_cleaner_TP6_{line}.tsv', line=cell_lines)
+    run:
+        import numpy as np
+
+        # Process guide info
+        dat = pd.read_csv(input.guides, index_col=0)
+        sdat = dat[dat.MappingQuality > 1]
+        sdat.rename(columns={'ReferenceName': 'CHRM', 
+                            'Position': 'STARTpos', 
+                            'End': 'ENDpos',
+                            'Sequence': 'seq',
+                            'exon_number': 'EXONE',
+                            }, inplace=True)
+        flag_to_strand = {
+            0: 'sense',   # Forward strand
+            16: 'antisense',  # Reverse strand
+        }
+        sdat['STRAND'] = sdat.Flag.map(flag_to_strand)
+        sdat['GENES'] = sdat.index.str.split('_').str[0]
+        sdat.index.name = 'CODE'
+        sdat.EXONE = sdat.EXONE.fillna(0).astype(int)
+        sdat = sdat[['GENES', 'CHRM', 'STARTpos', 'ENDpos', 'STRAND', 'EXONE', 'seq']]
+        sdat.to_csv(output.guides)
+        
+        # Save counts
+        counts = pd.read_csv(input.counts, index_col=0)
+        counts = counts[['Gene'] + list(counts.columns[12:])]
+        counts.index.name = 'sgRNA'
+        counts.rename(columns={'Gene': 'gene'}, inplace=True)
+        cell_line = np.array([x.split('-')[1] for x in counts.columns[1:]])
+        cell_line = np.array([cell_line_dict[int(x)] if 'pool' not in x else 'Pool' for x in cell_line])
+        replicate = np.array([x.split('-')[2] if 'pool' not in x else '0'+x[-5] for x in counts.columns[1:]])
+        time_point = np.array([x.split('-')[3][:3] if 'pool' not in x else 'Pool' for x in counts.columns[1:]])
+        # Save each cell line separately
+        # Only use TP6 for now
+        for cl in cell_line_dict.values():
+            idx = [True] + list(((cell_line == cl) & (time_point == 'TP6')) | (time_point == 'Pool'))
+            counts_ = counts.iloc[:, idx]
+            assert counts_.shape[1] == 4 + 3
+            counts_.to_csv(TEMPDIR / f'pooled_screen_1/crisprcleanr/pooled_screen_1_counts_for_cleaner_TP6_{cl}.tsv', sep='\t')
+
+rule crispr_cleanr:
+    input:
+        guides=TEMPDIR / 'pooled_screen_1/guide_alignment_genome_annotated_for_crisprcleanr.csv',
+        counts=TEMPDIR / 'pooled_screen_1/crisprcleanr/pooled_screen_1_counts_for_cleaner_TP6_{line}.tsv'
+    output:
+        corrlogFC=TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_corrected_logFCs.csv',
+        logFC=TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_original_logFCs.csv',
+        segments=TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_segments.csv',
+        sortedsgRNAs=TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_SORTED_sgRNAs.csv'
+    params:
+        outdir=TEMPDIR / 'pooled_screen_1/crisprcleanr/crisprcleanr'
+    conda: "crisprcleanr_env"  # "../environments/crisprcleanr_env.yaml"
+    resources:
+        time='1:00:00',
+        mem_mb=32000,
+        disk_mb=32000
+    script: "scripts/snake_crisprcleanr.R"
 
 ### DEPRECATED ###
 rule bwa_index_genome:
