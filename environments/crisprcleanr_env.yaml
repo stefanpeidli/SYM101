@@ -1,0 +1,13 @@
+name: crisprcleanr_env
+
+channels:
+ - conda-forge
+ - bioconda
+ - defaults
+
+dependencies:
+  - conda-forge::r-base
+  - conda-forge::r-irkernel
+  - conda-forge::r-optparse
+  - conda-forge::jupyter
+  - bioconda::r-crisprcleanr
