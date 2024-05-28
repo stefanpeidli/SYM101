@@ -40,6 +40,7 @@ ROOT = Path("../")
 cell_line_dict = config['cell_lines']
 cell_lines = list(cell_line_dict.values())
 
+### Define Outputs of this Workflow ###
 rule all:
     input:
         # QC
@@ -63,7 +64,7 @@ rule all:
         # CNE correction
         expand(TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_corrected_logFCs.csv', line=cell_lines),
 
-### UPSTREAM ###
+### Read processing and quantification ###
 rule download_fastq_bs:
     output:
         expand(TEMPDIR / 'pooled_screen_1/fastq/{sample}_L00{i}_R1_001.fastq', sample=sample_names, i=[1,2])
@@ -298,7 +299,7 @@ rule merge_counts:
         df = pd.merge(guide_df, df, how='right', left_index=True, right_index=True)  # add guide info
         df.to_csv(output[0])
 
-### DOWNSTREAM ###
+### Statistical Analysis ###
 rule mageck_define_controls:
     input:
         counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_{counts}.csv'
@@ -628,6 +629,7 @@ rule bagel2_merge:
         # write to file
         df.to_csv(output[0], sep='\t')
 
+### Align Guides and Check Copy Number effect ###
 rule cas_off_finder:
     input:
         "../resources/guide_list_casoffinder.txt"
@@ -644,7 +646,6 @@ rule cas_off_finder:
         cas-offinder {input} C {output}
         """
 
-### Align Guides and CNV effect ###
 rule align_guides_to_genome_hisat2:
     input:
         guide_fasta='../resources/pooled_screen_1_guides.fa',
@@ -725,7 +726,7 @@ rule crispr_cleanr_prepare_inputs:
         guides='/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/guides_aligned_to_genome_annotated.csv',
         counts='/scratch/peidli/SYMPHONY/pooled_screen_1/pooled_screen_1_counts.csv'
     output:
-        guides='/scratch/peidli/SYMPHONY/pooled_screen_1/guide_alignment_genome_annotated_for_crisprcleanr.csv',
+        guides='/scratch/peidli/SYMPHONY/pooled_screen_1/crisprcleanr/guide_alignment_genome_annotated_for_crisprcleanr.csv',
         counts=expand('/scratch/peidli/SYMPHONY/pooled_screen_1/crisprcleanr/pooled_screen_1_counts_for_cleaner_TP6_{line}.tsv', line=cell_lines)
     run:
         import numpy as np
@@ -769,7 +770,7 @@ rule crispr_cleanr_prepare_inputs:
 
 rule crispr_cleanr:
     input:
-        guides=TEMPDIR / 'pooled_screen_1/guide_alignment_genome_annotated_for_crisprcleanr.csv',
+        guides=TEMPDIR / 'pooled_screen_1/crisprcleanr/guide_alignment_genome_annotated_for_crisprcleanr.csv',
         counts=TEMPDIR / 'pooled_screen_1/crisprcleanr/pooled_screen_1_counts_for_cleaner_TP6_{line}.tsv'
     output:
         corrlogFC=TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_corrected_logFCs.csv',
@@ -777,7 +778,9 @@ rule crispr_cleanr:
         segments=TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_segments.csv',
         sortedsgRNAs=TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_SORTED_sgRNAs.csv'
     params:
-        outdir=TEMPDIR / 'pooled_screen_1/crisprcleanr/crisprcleanr'
+        outdir=TEMPDIR / 'pooled_screen_1/crisprcleanr/crisprcleanr',
+        min_width=2, # default is 2
+        min_ngenes=15  # I checked, this is not genes but guides. We have 5 - 7 guides per gene, so this needs to be 15 - 21, default is 3
     conda: "crisprcleanr_env"  # "../environments/crisprcleanr_env.yaml"
     resources:
         time='1:00:00',

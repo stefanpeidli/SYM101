@@ -4,7 +4,10 @@ suppressMessages(library('CRISPRcleanR'))
 cell_line <- snakemake@wildcards['line']
 libraryAnnotation <- read.table(snakemake@input[['guides']], header = TRUE, sep = ",", row.names = 1)
 counts_file <- snakemake@input[['counts']]
+
 outdir <- snakemake@params[['outdir']]
+min.ngenes <- snakemake@params[['min_ngenes']]  # default=3
+min.width <- snakemake@params[['min_width']]  # default=2
 
 ## Loading, median-normalizing and computing fold-changes
 normANDfcs <- ccr.NormfoldChanges(
@@ -29,7 +32,9 @@ correctedFCs_and_segments <- suppressWarnings(ccr.GWclean(
     gwSortedFCs = gwSortedFCs,
     display = TRUE,
     label = cell_line,
-    saveTO = outdir
+    saveTO = outdir,
+    min.ngenes=min.ngenes,
+    min.width=min.width,
 ))
 
 ## Write the corrected fold changes to file
