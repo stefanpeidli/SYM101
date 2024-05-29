@@ -1,3 +1,13 @@
+"""
+Annotate exon number for each guide RNA in the SAM file
+
+- Parse the alignment results (SAM/BAM files) to extract the alignment positions (chromosome, start, end).
+- Load the transcript annotation file (GTF/GFF) into memory.
+- For each alignment position, check which transcripts it overlaps with based on genomic coordinates.
+- Determine the exon(s) within the transcript that the alignment overlaps with.
+"""
+
+
 import pandas as pd
 import numpy as np
 from tqdm.auto import tqdm
