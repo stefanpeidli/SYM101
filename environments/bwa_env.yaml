@@ -1,4 +1,4 @@
-name: hisat2_env
+name: bwa_env
 
 channels:
  - bioconda

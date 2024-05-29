@@ -11,5 +11,5 @@ dependencies:
   - conda-forge::r-irkernel
   - conda-forge::r-optparse
   - conda-forge::jupyter
-  - bioconda::bioconductor-gscreend
+  - bioconda::bioconductor-gscreend=1.14.0
   - bioconda::bioconductor-summarizedexperiment
