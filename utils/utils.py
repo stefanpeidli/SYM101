@@ -1,3 +1,6 @@
+import numpy as np
+import pandas as pd
+
 def get_nnmd(df, score_column, ess_column='essentiality'):
     """Given essentiality scores or similar for a selection of gene targets in a pooled CRISPR screen with bulk readout, null-normalized mean difference (NNMD) measures the separation between scores for essential and non-essential genes.
     It is defined as the difference in means between scores of both groups divided by the standard deviation of the non-essential genes.

@@ -18,6 +18,7 @@ Description:
         - Runs MAGeCK
         - Runs BAGEL2
         - TODO: get scripts for Gscreend
+        - Time series clustering
     - Align Guides and Check Copy Number effect
         - Run cas-offinder to find off-targets
         - Align the guides to the genome with HISAT2
@@ -55,10 +56,10 @@ rule all:
         TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts_filtered.csv',  # removed "bad" guides identified with MAGeCK
         # Statistical Analysis
         ## MAGeCK test
-        expand('../results/mageck/{line}/{feature}_pooled_screen_1_{counts}_mageck.sgrna_summary.txt', 
+        expand('../results/mageck/summaries/{line}/{feature}_pooled_screen_1_{counts}_mageck.sgrna_summary.txt', 
             line=['alllines', 'H1975', 'H1299', 'A549'], counts=['counts', 'counts_filtered'], feature=['gene', 'transcript']),
         ## MAGeCK MLE
-        expand('../results/mageck/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.sgrna_summary.txt', 
+        expand('../results/mageck/summaries/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.sgrna_summary.txt', 
             feature=['gene', 'transcript'], time_key=['alltimes', 'TP1', 'TP5','TP6'], counts=['counts', 'counts_filtered']),
         ## BAGEL2
         expand('../results/bagel2/pooled_screen_1_{counts}_bagel_pr_gene.tsv', counts=['counts', 'counts_filtered']),
@@ -349,7 +350,7 @@ rule mageck_test:
         control=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_{counts}_control_guides.txt',
         day0=TEMPDIR / 'pooled_screen_1/mageck/{line}/pooled_screen_1_{counts}_day0_samples.txt',
     output:
-        '../results/mageck/{line}/{feature}_pooled_screen_1_{counts}_mageck.sgrna_summary.txt'
+        '../results/mageck/summaries/{line}/{feature}_pooled_screen_1_{counts}_mageck.sgrna_summary.txt'
     conda: "mageck_env"  # "../environments/mageck_env.yaml"
     shell:
         """
@@ -358,7 +359,7 @@ rule mageck_test:
         --count-table {input.counts} \
         --control-sgrna {input.control} \
         --day0-label $(cat {input.day0}) \
-        --output-prefix ../results/mageck/{wildcards.line}/{wildcards.feature}_pooled_screen_1_{wildcards.counts}_mageck \
+        --output-prefix ../results/mageck/summaries/{wildcards.line}/{wildcards.feature}_pooled_screen_1_{wildcards.counts}_mageck \
         --norm-method control \
         --pdf-report \
         --sort-criteria neg \
@@ -451,9 +452,9 @@ rule mageck_mle:
         design_matrix=TEMPDIR / 'pooled_screen_1/mageck/mageck_mle_designmat_{time_key}.txt',
         control=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_{counts}_control_guides.txt'
     output:
-        guide_summary='../results/mageck/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.sgrna_summary.txt',
-        feature_summary='../results/mageck/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.gene_summary.txt',
-        log=temp('../results/mageck/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.log')
+        guide_summary='../results/mageck/summaries/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.sgrna_summary.txt',
+        feature_summary='../results/mageck/summaries/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.gene_summary.txt',
+        log=temp('../results/mageck/summaries/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.log')
     params:
         output_prefix=lambda wildcards, output: output.feature_summary.replace('.gene_summary.txt', '')
     resources:
@@ -786,6 +787,34 @@ rule crispr_cleanr:
         mem_mb=32000,
         disk_mb=32000
     script: "scripts/snake_crisprcleanr.R"
+
+### IGV preparation ###
+rule igv_prepare_gtf:
+    output:
+        gtf=TEMPDIR / 'pooled_screen_1/igv/gencode.v45.annotation.bed'
+    conda: "../environments/igv_env.yaml"
+    resources:
+        time='1:00:00',
+        mem_mb=32000,
+        disk_mb=32000
+    shell:
+        """
+        mkdir -p {TEMPDIR}/pooled_screen_1/igv/
+        cd {TEMPDIR}/pooled_screen_1/igv/
+        wget -O gencode.v45.annotation.gtf.gz https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_45/gencode.v45.annotation.gtf.gz
+        wget https://ftp.ensembl.org/pub/release-112/gtf/homo_sapiens/Homo_sapiens.GRCh38.112.gtf.gz
+        gunzip gencode.v45.annotation.gtf.gz
+
+        # Convert to bed
+        gtf2bed < Homo_sapiens.GRCh38.112.gtf > Homo_sapiens.GRCh38.112.bed
+        # Sort
+        sort -k1,1 -k2,2n gencode.v45.annotation.bed > gencode.v45.annotation.sorted.bed
+        # Compression
+        bgzip gencode.v45.annotation.sorted.bed
+        # Indexing
+        tabix -p bed gencode.v45.annotation.sorted.bed.gz
+        """
+    
 
 ### DEPRECATED ###
 rule bwa_index_genome:
