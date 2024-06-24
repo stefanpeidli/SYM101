@@ -24,3 +24,9 @@ def get_nnmd(df, score_column, ess_column='essentiality'):
     diff = means['essential'] - means['non-essential']
     std_ne = tdf[tdf[ess_column]=='non-essential'][score_column].std()
     return np.abs(diff / std_ne)
+
+def annotate_essentiality(gene_list):
+    essential = pd.read_csv("../resources/bagel_supplement/CEGv2.txt", sep='\t', index_col=0)
+    non_essential = pd.read_csv("../resources/bagel_supplement/NEGv1.txt", sep='\t', index_col=0)
+    assert np.intersect1d(gene_list, essential.index).size + np.intersect1d(gene_list, non_essential.index).size > 0, "Gene lists not overlapping, maybe your gene symbols are wrong?"
+    return ['essential' if gene in essential.index else 'non-essential' if gene in non_essential.index else 'unknown' for gene in gene_list]
