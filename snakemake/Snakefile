@@ -60,7 +60,7 @@ rule all:
             line=['alllines', 'H1975', 'H1299', 'A549'], counts=['counts', 'counts_filtered'], feature=['gene', 'transcript']),
         ## MAGeCK MLE
         expand('../results/mageck/summaries/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.sgrna_summary.txt', 
-            feature=['gene', 'transcript'], time_key=['alltimes', 'TP1', 'TP5','TP6'], counts=['counts', 'counts_filtered']),
+            feature=['gene', 'transcript'], time_key=['alltimes', 'TP1', 'TP2', 'TP3', 'TP4', 'TP5','TP6'], counts=['counts', 'counts_filtered']),
         ## BAGEL2
         expand('../results/bagel2/pooled_screen_1_{counts}_bagel_pr_gene.tsv', counts=['counts', 'counts_filtered']),
         ## Timeseries clustering
@@ -68,6 +68,9 @@ rule all:
         # Align Guides and Check Copy Number effect
         # "../results/tables/cas_off_finder.txt",
         expand(TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_corrected_logFCs.csv', line=cell_lines),
+        TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_v45_transcriptome_annotated.csv',
+        TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_v19_transcriptome_annotated.csv'
+        
 
 ### Read processing and quantification ###
 rule download_fastq_bs:
@@ -651,7 +654,7 @@ rule align_guides_to_genome_hisat2:
         guide_fasta='../resources/pooled_screen_1_guides.fa',
         index="/g/huber/users/peidli/utils/genomes/homo_sapiens/grch38"
     output:
-        sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_genome.sam'
+        sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_genome.sam'
     resources:
         time='24:00:00',
         mem_mb=64000,
@@ -667,9 +670,32 @@ rule align_guides_to_genome_hisat2:
         -p {threads}
         """
 
-rule hisat2_index_transcriptome:
+rule get_reference_fasta:
     output:
-        expand(TEMPDIR / 'pooled_screen_1/hisat2/gencode.v45.transcripts.{i}.ht2', i=range(1,9))
+        TEMPDIR / 'pooled_screen_1/hisat2/gencode.v{version}.transcripts.fa'
+    shell:
+        """
+        cd {TEMPDIR}/pooled_screen_1/hisat2/
+        if [ {wildcards.version} -le "19" ]; then
+            # merge pc and lncRNA
+            wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{wildcards.version}/gencode.v{wildcards.version}.lncRNA_transcripts.fa.gz
+            wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{wildcards.version}/gencode.v{wildcards.version}.pc_transcripts.fa.gz
+            gunzip gencode.v{wildcards.version}.lncRNA_transcripts.fa.gz
+            gunzip gencode.v{wildcards.version}.pc_transcripts.fa.gz
+            cat gencode.v{wildcards.version}.lncRNA_transcripts.fa \
+                gencode.v{wildcards.version}.pc_transcripts.fa \
+                > gencode.v{wildcards.version}.transcripts.fa
+        else
+            wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{wildcards.version}/gencode.v{wildcards.version}.transcripts.fa.gz
+            gunzip gencode.v{wildcards.version}.transcripts.fa.gz
+        fi
+        """
+
+rule hisat2_index_transcriptome:
+    input:
+        fasta=TEMPDIR / 'pooled_screen_1/hisat2/gencode.v{version}.transcripts.fa'
+    output:
+        expand(TEMPDIR / 'pooled_screen_1/hisat2/gencode.v{{version}}.transcripts.{i}.ht2', i=range(1,9))
     resources:
         time='24:00:00',
         mem_mb=16000,
@@ -679,46 +705,54 @@ rule hisat2_index_transcriptome:
     shell:
         """
         cd {TEMPDIR}/pooled_screen_1/hisat2/
-        wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_45/gencode.v45.transcripts.fa.gz
-        gunzip gencode.v45.transcripts.fa.gz
-        hisat2-build -p {threads} gencode.v45.transcripts.fa {TEMPDIR}/pooled_screen_1/hisat2/gencode.v45.transcripts
+        hisat2-build \
+            -p {threads} \
+            {input.fasta} \
+            {TEMPDIR}/pooled_screen_1/hisat2/gencode.v{wildcards.version}.transcripts
         """
 
 rule align_guides_to_transcriptome_hisat2:
     input:
         guide_fasta='../resources/pooled_screen_1_guides.fa',
-        index=expand(TEMPDIR / 'pooled_screen_1/hisat2/gencode.v45.transcripts.{i}.ht2', i=range(1,9))
+        index=expand(TEMPDIR / 'pooled_screen_1/hisat2/gencode.{{v}}.transcripts.{i}.ht2', i=range(1,9))
     output:
-        sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_transcriptome.sam'
+        sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_{v}_transcriptome.sam'
     resources:
         time='24:00:00',
         mem_mb=64000,
         disk_mb=64000
+    params:
+        max_multihits=50  # definitely high enough fpr v19. Biggest value I saw was around 25 alignments for a single guide.
     threads: 8
     conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
     shell:
         """
         hisat2 -f \
-        -x {TEMPDIR}/pooled_screen_1/hisat2/gencode.v45.transcripts \
+        -x {TEMPDIR}/pooled_screen_1/hisat2/gencode.{wildcards.v}.transcripts \
         -U {input.guide_fasta} \
         -S {output.sam} \
-        -p {threads}
+        -p {threads} \
+        -k {params.max_multihits}
         """
 
 rule annotate_exon_number:
     input:
-        sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_{feature}.sam',
-        gtf='/g/huber/users/peidli/utils/genomes/homo_sapiens/Homo_sapiens.GRCh38.111.gtf'
+        sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_{version_and_feature}.sam',
+        gtf='/g/huber/users/peidli/utils/genomes/homo_sapiens/Homo_sapiens.GRCh38.111.gtf'  #TODO: Question do I need to adapt to reference?
     output:
-        annotated_csv=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_to_{feature}_annotated.csv',
-        series=TEMPDIR / 'pooled_screen_1/hisat2/exon_numbers_{feature}.csv'
+        annotated_csv=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_{version_and_feature}_annotated.csv',
+        series=TEMPDIR / 'pooled_screen_1/hisat2/exon_numbers_{version_and_feature}.csv'
     resources:
         time='10:00:00',
         mem_mb=64000,
         disk_mb=64000
     shell:
         """
-        python scripts/annotate_exon_number.py -i {input.sam} -g {input.gtf} -o {output.annotated_csv} -x {output.series}
+        python scripts/annotate_exon_number.py \
+            -i {input.sam} \
+            -g {input.gtf} \
+            -o {output.annotated_csv} \
+            -x {output.series}
         """
 
 rule crispr_cleanr_prepare_inputs:
@@ -788,7 +822,7 @@ rule crispr_cleanr:
         disk_mb=32000
     script: "scripts/snake_crisprcleanr.R"
 
-### IGV preparation ###
+### IGV preparation ### PROBLEM: IGV is weird with transcriptome. Can only look at one transcript at a time. Maybe use genome alignment instead?
 rule igv_prepare_gtf:
     output:
         gtf=TEMPDIR / 'pooled_screen_1/igv/gencode.v45.annotation.bed'
@@ -814,7 +848,6 @@ rule igv_prepare_gtf:
         # Indexing
         tabix -p bed gencode.v45.annotation.sorted.bed.gz
         """
-    
 
 ### DEPRECATED ###
 rule bwa_index_genome:
