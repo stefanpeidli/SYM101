@@ -31,13 +31,11 @@ from pathlib import Path
 from snakemake.utils import min_version
 
 min_version("6.4.1")  # set minimum snakemake version
-report: "report/workflow.rst"
 configfile: "../configuration/config.yaml"
 
 ### PATHS and Names ###
 TEMPDIR = Path(config['TEMPDIR'])
 DATADIR = Path(config['DATADIR'])
-ROOT = Path("../")
 
 sample_names = list(pd.read_csv('../resources/pooled_screen_1_fastqs.txt', sep='\t', index_col=0).index)
 sample_names = [x for x in sample_names if 'Undetermined_S0' not in x]
@@ -69,7 +67,8 @@ rule all:
         # "../results/tables/cas_off_finder.txt",
         expand(TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_corrected_logFCs.csv', line=cell_lines),
         TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_v45_transcriptome_annotated.csv',
-        TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_v19_transcriptome_annotated.csv'
+        TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_v19_transcriptome_annotated.csv',
+        '../results/mageck/pooled_screen_1_mageck_filtered_guides_v2.tsv'
         
 
 ### Read processing and quantification ###
@@ -138,7 +137,7 @@ rule custom_trimming:
         disk_mb=16000,
         time='12:00:00',
     threads: 8
-    conda: 'trimming_env'  # ROOT / "environments/trimming_env.yaml"
+    conda: 'trimming_env'  # "../environments/trimming_env.yaml"
     shell:
         """
         mkdir -p {TEMPDIR}/pooled_screen_1/trimmed/qc
@@ -482,7 +481,7 @@ rule mageck_mle:
 rule mageck_filter_guides:
     # Takes MAGeCK results per line, aggregates and marks guides that did not have an effect in any line according to MAGeCK score
     input:
-        mageck=expand('../results/mageck/{line}/gene_pooled_screen_1_counts_mageck.sgrna_summary.txt', line=cell_lines),
+        mageck=expand('../results/mageck/summaries/{line}/gene_pooled_screen_1_counts_mageck.sgrna_summary.txt', line=cell_lines),
         counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv'
     output:
         filtering_qc_plot='../results/mageck/mageck_score_vs_LFC.pdf',
@@ -821,98 +820,6 @@ rule crispr_cleanr:
         mem_mb=32000,
         disk_mb=32000
     script: "scripts/snake_crisprcleanr.R"
-
-### IGV preparation ### PROBLEM: IGV is weird with transcriptome. Can only look at one transcript at a time. Maybe use genome alignment instead?
-rule igv_prepare_gtf:
-    output:
-        gtf=TEMPDIR / 'pooled_screen_1/igv/gencode.v45.annotation.bed'
-    conda: "../environments/igv_env.yaml"
-    resources:
-        time='1:00:00',
-        mem_mb=32000,
-        disk_mb=32000
-    shell:
-        """
-        mkdir -p {TEMPDIR}/pooled_screen_1/igv/
-        cd {TEMPDIR}/pooled_screen_1/igv/
-        wget -O gencode.v45.annotation.gtf.gz https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_45/gencode.v45.annotation.gtf.gz
-        wget https://ftp.ensembl.org/pub/release-112/gtf/homo_sapiens/Homo_sapiens.GRCh38.112.gtf.gz
-        gunzip gencode.v45.annotation.gtf.gz
-
-        # Convert to bed
-        gtf2bed < Homo_sapiens.GRCh38.112.gtf > Homo_sapiens.GRCh38.112.bed
-        # Sort
-        sort -k1,1 -k2,2n gencode.v45.annotation.bed > gencode.v45.annotation.sorted.bed
-        # Compression
-        bgzip gencode.v45.annotation.sorted.bed
-        # Indexing
-        tabix -p bed gencode.v45.annotation.sorted.bed.gz
-        """
-
-### DEPRECATED ###
-rule bwa_index_genome:
-    input:
-        '{genome}.fa'
-    output:
-        genome_index=expand('{{genome}}.fa.{idx}', idx=['amb', 'ann', 'bwt', 'pac', 'sa'])
-    shell:
-        """
-        bwa index {input}
-        """
-
-rule align_guides_to_genome_bwa:
-    input:
-        guide_fasta='../resources/pooled_screen_1_guides.fa',
-        genome_fasta='/home/peidli/utils/genomes/homo_sapiens/Homo_sapiens.GRCh38.dna.toplevel.fa',
-        genome_index=expand('/home/peidli/utils/genomes/homo_sapiens/Homo_sapiens.GRCh38.dna.toplevel.fa.{idx}', idx=['amb', 'ann', 'bwt', 'pac', 'sa'])
-    output:
-        TEMPDIR / 'pooled_screen_1/bwa/pooled_screen_1_guides_to_genome.sam'
-    resources:
-        time='10:00:00',
-        mem_mb=64000,
-        disk_mb=64000
-    conda:
-        ROOT / "environments/bwa_env.yaml"
-    threads: 8
-    shell:
-        """
-        bwa mem -t {threads} {input.genome_fasta} {input.guide_fasta} > {output}
-        """
-
-rule render_datavzrd:
-    input:
-        gene_results="../results/merged/gene_results.csv",
-        transcript_results="../results/merged/transcript_results.csv",
-        guide_results="../results/merged/guide_results.csv",
-        config="../configuration/datavzrd-config.yaml"
-    output:
-        website=directory('../results/datavzrd/pooled_screen_1_online/')
-    shell:
-        """
-        datavzrd \
-            --verbose \
-            --overwrite-output \
-            --output {output.website} \
-            {input.config}
-        # datavzrd --verbose --overwrite-output --output ../results/datavzrd/pooled_screen_1_online/ ../configuration/datavzrd-config.yaml
-        """
-
-rule cutadapt_single_end:
-    input:
-        TEMPDIR / 'pooled_screen_1/fastq/{sample}_L00{i}_R1_001.fastq'
-    output:
-        fastq=TEMPDIR / 'pooled_screen_1/trimmed/{sample}_L00{i}_R1_001.fastq',
-        qc=TEMPDIR / 'pooled_screen_1/trimmed/qc/{sample}_L00{i}_R1_001.qc.txt',
-    params:
-        primer_seq=config['primer_seq']
-    threads: 8
-    conda: "cutadapt_env" #  "../environments/cutadapt_env.yaml"
-    shell:
-        """
-        cutadapt --cores {threads} \
-            -g {params.primer_seq}  \
-            -o {output.fastq} {input} > {output.qc} 
-        """
 
 onsuccess: 
     print("Snakemake is done!")

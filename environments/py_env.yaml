@@ -14,6 +14,7 @@ dependencies:
  - conda-forge::seaborn=0.11.2
  - conda-forge::matplotlib
  - conda-forge::snakemake=7.32.4
+ - conda-forge::nbformat=5.0.8  # >5.1 causes issues with jupyter ("id" tag)
  - conda-forge::jupyter
  - conda-forge::ipykernel
  - conda-forge::nbconvert
