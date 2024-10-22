@@ -19,3 +19,4 @@ dependencies:
   - conda-forge::nbconvert
   - conda-forge::statannotations==0.6
   - conda-forge::mscorefonts
+  - conda-forge::openpyxl
