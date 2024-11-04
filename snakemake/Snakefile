@@ -1,6 +1,6 @@
 """
 Author: Stefan Peidli
-Title: Snakemake workflow for SYMPHONY experiment pooled_screen_1.
+Title: Snakemake workflow for SYMPHONY experiment SYM101.
 Date: 29.05.2024
 Run: snakemake
 Create DAG: snakemake --forceall --dag | dot -Tpdf > snake_dag.pdf
@@ -13,7 +13,7 @@ Description:
         - Trim the FASTQ files with a custom script
         - Align the trimmed FASTQ files to the guides with HISAT2
         - Count the number of reads per guide using samtools
-        - Merges the counts into a single table "pooled_screen_1_counts.csv"
+        - Merges the counts into a single table "SYM101_counts.csv"
     - Downstream processing
         - Runs MAGeCK
         - Runs BAGEL2
@@ -32,12 +32,14 @@ from snakemake.utils import min_version
 
 min_version("6.4.1")  # set minimum snakemake version
 configfile: "../configuration/config.yaml"
+conda: "../environments/snake_env.yaml"
 
-### PATHS and Names ###
+### PATHS ###
 TEMPDIR = Path(config['TEMPDIR'])
 DATADIR = Path(config['DATADIR'])
 
-sample_names = list(pd.read_csv('../resources/pooled_screen_1_fastqs.txt', sep='\t', index_col=0).index)
+### SAMPLES ###
+sample_names = list(pd.read_csv('../resources/SYM101_fastqs.txt', sep='\t', index_col=0).index)
 sample_names = [x for x in sample_names if 'Undetermined_S0' not in x]
 assert len(sample_names) == 6*(3*3) + 3, f"Expected 57 (6TP x 3lines x 3reps + 3 Pools) samples, got " + str(len(sample_names))
 guide_df = pd.read_csv('../resources/all_gRNA_data.csv', index_col='unique_guide_name')
@@ -50,39 +52,39 @@ rule all:
         # Read processing and quantification
         "../results/multiqc/multiqc.html",
         "../results/trimming/trimmed_summary.csv",
-        TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv',
-        TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts_filtered.csv',  # removed "bad" guides identified with MAGeCK
+        TEMPDIR / 'SYM101/SYM101_counts.csv',
+        TEMPDIR / 'SYM101/SYM101_counts_filtered.csv',  # removed "bad" guides identified with MAGeCK
         # Statistical Analysis
         ## MAGeCK test
-        expand('../results/mageck/summaries/{line}/{feature}_pooled_screen_1_{counts}_mageck.sgrna_summary.txt', 
+        expand('../results/mageck/summaries/{line}/{feature}_SYM101_{counts}_mageck.sgrna_summary.txt', 
             line=['alllines', 'H1975', 'H1299', 'A549'], counts=['counts', 'counts_filtered'], feature=['gene', 'transcript']),
         ## MAGeCK MLE
-        expand('../results/mageck/summaries/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.sgrna_summary.txt', 
+        expand('../results/mageck/summaries/{feature}_{time_key}_SYM101_{counts}_mageck_mle.sgrna_summary.txt', 
             feature=['gene', 'transcript'], time_key=['alltimes', 'TP1', 'TP2', 'TP3', 'TP4', 'TP5','TP6'], counts=['counts', 'counts_filtered']),
         ## BAGEL2
-        expand('../results/bagel2/pooled_screen_1_{counts}_bagel_pr_gene.tsv', counts=['counts', 'counts_filtered']),
+        expand('../results/bagel2/SYM101_{counts}_bagel_pr_gene.tsv', counts=['counts', 'counts_filtered']),
         ## Timeseries clustering
         expand('../results/timecourse/timecourse_clusters_{cell_line}.csv', cell_line=cell_lines),
         # Align Guides and Check Copy Number effect
         # "../results/tables/cas_off_finder.txt",
-        expand(TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_corrected_logFCs.csv', line=cell_lines),
-        TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_v45_transcriptome_annotated.csv',
-        TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_v19_transcriptome_annotated.csv',
-        '../results/mageck/pooled_screen_1_mageck_filtered_guides_v2.tsv'
+        expand(TEMPDIR / 'SYM101/crisprcleanr/{line}_corrected_logFCs.csv', line=cell_lines),
+        TEMPDIR / 'SYM101/hisat2/guides_aligned_v45_transcriptome_annotated.csv',
+        TEMPDIR / 'SYM101/hisat2/guides_aligned_v19_transcriptome_annotated.csv',
+        '../results/mageck/SYM101_mageck_filtered_guides_v2.tsv'
         
 
 ### Read processing and quantification ###
 rule download_fastq_bs:
     output:
-        expand(TEMPDIR / 'pooled_screen_1/fastq/{sample}_L00{i}_R1_001.fastq', sample=sample_names, i=[1,2])
+        expand(TEMPDIR / 'SYM101/fastq/{sample}_L00{i}_R1_001.fastq', sample=sample_names, i=[1,2])
     resources:
         time='12:00:00',
         mem_mb=64000,
         disk_mb=64000,
     shell:
         """
-        bs download appsession -v --id=715537995 --extension=fastq.gz -o {TEMPDIR}/pooled_screen_1/fastq/
-        cd {TEMPDIR}/pooled_screen_1/fastq/
+        bs download appsession -v --id=715537995 --extension=fastq.gz -o {TEMPDIR}/SYM101/fastq/
+        cd {TEMPDIR}/SYM101/fastq/
         # fastq files seem redundantly available in the subfolders
         rm -r *_L00*_ds.*
         # move all fastq files to main folder
@@ -95,10 +97,10 @@ rule download_fastq_bs:
 
 rule fastqc:
     input:
-        TEMPDIR / 'pooled_screen_1/fastq/{sample}_L00{i}_R1_001.fastq'
+        TEMPDIR / 'SYM101/fastq/{sample}_L00{i}_R1_001.fastq'
     output:
-        html=TEMPDIR / "pooled_screen_1/fastqc/{sample}_L00{i}.html",
-        zip=TEMPDIR / "pooled_screen_1/fastqc/{sample}_L00{i}_fastqc.zip" # the suffix _fastqc.zip is necessary for multiqc to find the file. If not using multiqc, you are free to choose an arbitrary filename
+        html=TEMPDIR / "SYM101/fastqc/{sample}_L00{i}.html",
+        zip=TEMPDIR / "SYM101/fastqc/{sample}_L00{i}_fastqc.zip" # the suffix _fastqc.zip is necessary for multiqc to find the file. If not using multiqc, you are free to choose an arbitrary filename
     params:
         extra = "--quiet"
     threads: 4
@@ -109,8 +111,8 @@ rule fastqc:
 
 rule multiqc:
     input:
-        fastqc=expand(TEMPDIR / "pooled_screen_1/fastqc/{sample}_L00{i}.html", sample=sample_names, i=[1,2]),
-        samtools=expand(TEMPDIR / "pooled_screen_1/hisat2/{sample}_L00{i}_R1_001_custom_trimmed_stats.txt", sample=sample_names, i=[1,2]),
+        fastqc=expand(TEMPDIR / "SYM101/fastqc/{sample}_L00{i}.html", sample=sample_names, i=[1,2]),
+        samtools=expand(TEMPDIR / "SYM101/hisat2/{sample}_L00{i}_R1_001_custom_trimmed_stats.txt", sample=sample_names, i=[1,2]),
     output:
         "../results/multiqc/multiqc.html",
         directory("../results/multiqc/multiqc_data"),
@@ -123,10 +125,10 @@ rule multiqc:
 
 rule custom_trimming:
     input:
-        TEMPDIR / 'pooled_screen_1/fastq/{sample}_L00{i}_R1_001.fastq'
+        TEMPDIR / 'SYM101/fastq/{sample}_L00{i}_R1_001.fastq'
     output:
-        fastq=TEMPDIR / 'pooled_screen_1/trimmed/{sample}_L00{i}_R1_001_custom_trimmed.fastq',
-        qc=TEMPDIR / 'pooled_screen_1/trimmed/qc/{sample}_L00{i}_R1_001_custom_trimmed_qc.csv'
+        fastq=TEMPDIR / 'SYM101/trimmed/{sample}_L00{i}_R1_001_custom_trimmed.fastq',
+        qc=TEMPDIR / 'SYM101/trimmed/qc/{sample}_L00{i}_R1_001_custom_trimmed_qc.csv'
     params:
         primer_seq=config['primer_seq'],
         pmin=config['primer_range']['min'],
@@ -140,7 +142,7 @@ rule custom_trimming:
     conda: 'trimming_env'  # "../environments/trimming_env.yaml"
     shell:
         """
-        mkdir -p {TEMPDIR}/pooled_screen_1/trimmed/qc
+        mkdir -p {TEMPDIR}/SYM101/trimmed/qc
         python scripts/variable_trimming.py -i {input} -o {output.fastq} \
             -q {output.qc} \
             -p {params.primer_seq} \
@@ -151,7 +153,7 @@ rule custom_trimming:
 
 rule custom_trimming_summary:
     input:
-        expand(TEMPDIR / 'pooled_screen_1/trimmed/qc/{sample}_L00{i}_R1_001_custom_trimmed_qc.csv', sample=sample_names, i=[1,2])
+        expand(TEMPDIR / 'SYM101/trimmed/qc/{sample}_L00{i}_R1_001_custom_trimmed_qc.csv', sample=sample_names, i=[1,2])
     output:
         table="../results/trimming/trimmed_summary.csv",
         fig1="../results/trimming/trimmed_summary_scatter.pdf",
@@ -161,7 +163,7 @@ rule custom_trimming_summary:
         import matplotlib.ticker as mtick
         import matplotlib.pyplot as pl
 
-        path = Path(config['TEMPDIR']) /'pooled_screen_1/trimmed/qc'
+        path = Path(config['TEMPDIR']) /'SYM101/trimmed/qc'
         qcs = {x.name.split('_R1_001')[0]: pd.read_csv(x, sep='\t') for x in path.glob('*_custom_trimmed_qc.csv')}
         df = pd.concat(qcs).droplevel(1)
         df['fraction_filtered'] = df.Filtered_reads / df.Total_reads
@@ -194,7 +196,7 @@ rule guide_to_fasta:
     input:
         '../resources/all_gRNA_data.csv'
     output:
-        '../resources/pooled_screen_1_guides.fa'
+        '../resources/SYM101_guides.fa'
     run:
         from tqdm.auto import tqdm
         guide_df = pd.read_csv(input[0], index_col='unique_guide_name')
@@ -207,9 +209,9 @@ rule guide_to_fasta:
 
 rule hisat2_guide_index:
     input:
-        '../resources/pooled_screen_1_guides.fa'
+        '../resources/SYM101_guides.fa'
     output:
-        expand(TEMPDIR / 'pooled_screen_1/hisat2/index.{i}.ht2', i=range(1,9))
+        expand(TEMPDIR / 'SYM101/hisat2/index.{i}.ht2', i=range(1,9))
     threads: 8
     conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
     shell:
@@ -219,10 +221,10 @@ rule hisat2_guide_index:
 
 rule hisat2_align:
     input:
-        trimmed_fastq=TEMPDIR / 'pooled_screen_1/trimmed/{sample}_L00{i}_R1_001_custom_trimmed.fastq',
-        index=expand(TEMPDIR / 'pooled_screen_1/hisat2/index.{i}.ht2', i=range(1,9))
+        trimmed_fastq=TEMPDIR / 'SYM101/trimmed/{sample}_L00{i}_R1_001_custom_trimmed.fastq',
+        index=expand(TEMPDIR / 'SYM101/hisat2/index.{i}.ht2', i=range(1,9))
     output:
-        sam=TEMPDIR / 'pooled_screen_1/hisat2/{sample}_L00{i}_R1_001_custom_trimmed.sam'
+        sam=TEMPDIR / 'SYM101/hisat2/{sample}_L00{i}_R1_001_custom_trimmed.sam'
     resources:
         time='04:00:00',
         mem_mb=32000,
@@ -232,7 +234,7 @@ rule hisat2_align:
     shell:
         """
         hisat2 \
-        -x {TEMPDIR}/pooled_screen_1/hisat2/index \
+        -x {TEMPDIR}/SYM101/hisat2/index \
         -U {input.trimmed_fastq} \
         -S {output.sam} \
         -p {threads}
@@ -240,9 +242,9 @@ rule hisat2_align:
 
 rule samtools_stats:
     input:
-        sam=TEMPDIR / 'pooled_screen_1/hisat2/{sample}_L00{i}_R1_001_custom_trimmed.sam'
+        sam=TEMPDIR / 'SYM101/hisat2/{sample}_L00{i}_R1_001_custom_trimmed.sam'
     output:
-        stats=TEMPDIR / 'pooled_screen_1/hisat2/{sample}_L00{i}_R1_001_custom_trimmed_stats.txt'
+        stats=TEMPDIR / 'SYM101/hisat2/{sample}_L00{i}_R1_001_custom_trimmed_stats.txt'
     resources:
         time='01:00:00',
         mem_mb=16000,
@@ -256,9 +258,9 @@ rule samtools_stats:
 
 rule count:
     input:
-        sam=TEMPDIR / 'pooled_screen_1/hisat2/{sample}_L00{i}_R1_001_custom_trimmed.sam'
+        sam=TEMPDIR / 'SYM101/hisat2/{sample}_L00{i}_R1_001_custom_trimmed.sam'
     output:
-        counts=TEMPDIR / 'pooled_screen_1/counts/{sample}_L00{i}_counts.txt'
+        counts=TEMPDIR / 'SYM101/counts/{sample}_L00{i}_counts.txt'
     resources:
         time='01:00:00',
         mem_mb=16000,
@@ -270,10 +272,10 @@ rule count:
 
 rule merge_counts:
     input:
-        counts=expand(TEMPDIR / 'pooled_screen_1/counts/{sample}_L00{i}_counts.txt', sample=sample_names, i=[1,2]),
+        counts=expand(TEMPDIR / 'SYM101/counts/{sample}_L00{i}_counts.txt', sample=sample_names, i=[1,2]),
         guide_df='../resources/all_gRNA_data.csv'
     output:
-        TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv'
+        TEMPDIR / 'SYM101/SYM101_counts.csv'
     run:
         guide_df = pd.read_csv(input.guide_df, index_col='unique_guide_name')
         counts = {Path(x).name.split('_counts')[0]: pd.read_csv(x, sep='\t', header=None, index_col=0) for x in input.counts}
@@ -292,9 +294,9 @@ rule merge_counts:
 ### Statistical Analysis ###
 rule mageck_define_controls:
     input:
-        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_{counts}.csv'
+        counts=TEMPDIR / 'SYM101/SYM101_{counts}.csv'
     output:
-        control=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_{counts}_control_guides.txt',
+        control=TEMPDIR / 'SYM101/mageck/SYM101_{counts}_control_guides.txt',
     run:
         # Define where NT control guides are located in the count matrix
         df = pd.read_csv(input.counts, index_col=0)
@@ -303,11 +305,11 @@ rule mageck_define_controls:
 
 rule mageck_test_prepare_inputs:
     input:
-        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_{counts}.csv'
+        counts=TEMPDIR / 'SYM101/SYM101_{counts}.csv'
     output:
-        gene_counts=TEMPDIR / 'pooled_screen_1/mageck/{line}/gene_pooled_screen_1_{counts}.tsv',
-        transcript_counts=TEMPDIR / 'pooled_screen_1/mageck/{line}/transcript_pooled_screen_1_{counts}.tsv',
-        day0=TEMPDIR / 'pooled_screen_1/mageck/{line}/pooled_screen_1_{counts}_day0_samples.txt',
+        gene_counts=TEMPDIR / 'SYM101/mageck/{line}/gene_SYM101_{counts}.tsv',
+        transcript_counts=TEMPDIR / 'SYM101/mageck/{line}/transcript_SYM101_{counts}.tsv',
+        day0=TEMPDIR / 'SYM101/mageck/{line}/SYM101_{counts}_day0_samples.txt',
     run:
         line = wildcards.line
         df = pd.read_csv(input.counts, index_col=0)
@@ -348,11 +350,11 @@ rule mageck_test_prepare_inputs:
 rule mageck_test:
     input:
     # I should run this per cell line I guess and only use TP6
-        counts=TEMPDIR / 'pooled_screen_1/mageck/{line}/{feature}_pooled_screen_1_{counts}.tsv',
-        control=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_{counts}_control_guides.txt',
-        day0=TEMPDIR / 'pooled_screen_1/mageck/{line}/pooled_screen_1_{counts}_day0_samples.txt',
+        counts=TEMPDIR / 'SYM101/mageck/{line}/{feature}_SYM101_{counts}.tsv',
+        control=TEMPDIR / 'SYM101/mageck/SYM101_{counts}_control_guides.txt',
+        day0=TEMPDIR / 'SYM101/mageck/{line}/SYM101_{counts}_day0_samples.txt',
     output:
-        '../results/mageck/summaries/{line}/{feature}_pooled_screen_1_{counts}_mageck.sgrna_summary.txt'
+        '../results/mageck/summaries/{line}/{feature}_SYM101_{counts}_mageck.sgrna_summary.txt'
     conda: "mageck_env"  # "../environments/mageck_env.yaml"
     shell:
         """
@@ -361,7 +363,7 @@ rule mageck_test:
         --count-table {input.counts} \
         --control-sgrna {input.control} \
         --day0-label $(cat {input.day0}) \
-        --output-prefix ../results/mageck/summaries/{wildcards.line}/{wildcards.feature}_pooled_screen_1_{wildcards.counts}_mageck \
+        --output-prefix ../results/mageck/summaries/{wildcards.line}/{wildcards.feature}_SYM101_{wildcards.counts}_mageck \
         --norm-method control \
         --pdf-report \
         --sort-criteria neg \
@@ -370,9 +372,9 @@ rule mageck_test:
 
 rule mageck_mle_prepare_counts:
     input:
-        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_{counts}.csv'
+        counts=TEMPDIR / 'SYM101/SYM101_{counts}.csv'
     output:
-        counts_prepared=TEMPDIR / 'pooled_screen_1/mageck/mageck_mle_{counts}_{time}_{feature}.csv',
+        counts_prepared=TEMPDIR / 'SYM101/mageck/mageck_mle_{counts}_{time}_{feature}.csv',
     run:
         # Prepare counts for MAGeCK MLE module
         df = pd.read_csv(input.counts, index_col=0)
@@ -399,9 +401,9 @@ rule mageck_mle_prepare_counts:
 
 rule mageck_mle_prepare_designs:
     input:
-        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv'
+        counts=TEMPDIR / 'SYM101/SYM101_counts.csv'
     output:
-        design_matrix=TEMPDIR / 'pooled_screen_1/mageck/mageck_mle_designmat_{time}.txt', 
+        design_matrix=TEMPDIR / 'SYM101/mageck/mageck_mle_designmat_{time}.txt', 
     params:
         time_model='categorical'  # 'linear' or 'categorical'
     run:
@@ -450,13 +452,13 @@ rule mageck_mle_prepare_designs:
 
 rule mageck_mle:
     input:
-        counts_prepared=TEMPDIR / 'pooled_screen_1/mageck/mageck_mle_{counts}_{time_key}_{feature}.csv',
-        design_matrix=TEMPDIR / 'pooled_screen_1/mageck/mageck_mle_designmat_{time_key}.txt',
-        control=TEMPDIR / 'pooled_screen_1/mageck/pooled_screen_1_{counts}_control_guides.txt'
+        counts_prepared=TEMPDIR / 'SYM101/mageck/mageck_mle_{counts}_{time_key}_{feature}.csv',
+        design_matrix=TEMPDIR / 'SYM101/mageck/mageck_mle_designmat_{time_key}.txt',
+        control=TEMPDIR / 'SYM101/mageck/SYM101_{counts}_control_guides.txt'
     output:
-        guide_summary='../results/mageck/summaries/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.sgrna_summary.txt',
-        feature_summary='../results/mageck/summaries/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.gene_summary.txt',
-        log=temp('../results/mageck/summaries/{feature}_{time_key}_pooled_screen_1_{counts}_mageck_mle.log')
+        guide_summary='../results/mageck/summaries/{feature}_{time_key}_SYM101_{counts}_mageck_mle.sgrna_summary.txt',
+        feature_summary='../results/mageck/summaries/{feature}_{time_key}_SYM101_{counts}_mageck_mle.gene_summary.txt',
+        log=temp('../results/mageck/summaries/{feature}_{time_key}_SYM101_{counts}_mageck_mle.log')
     params:
         output_prefix=lambda wildcards, output: output.feature_summary.replace('.gene_summary.txt', '')
     resources:
@@ -481,14 +483,14 @@ rule mageck_mle:
 rule mageck_filter_guides:
     # Takes MAGeCK results per line, aggregates and marks guides that did not have an effect in any line according to MAGeCK score
     input:
-        mageck=expand('../results/mageck/summaries/{line}/gene_pooled_screen_1_counts_mageck.sgrna_summary.txt', line=cell_lines),
-        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts.csv'
+        mageck=expand('../results/mageck/summaries/{line}/gene_SYM101_counts_mageck.sgrna_summary.txt', line=cell_lines),
+        counts=TEMPDIR / 'SYM101/SYM101_counts.csv'
     output:
         filtering_qc_plot='../results/mageck/mageck_score_vs_LFC.pdf',
         filtering_hist_plot='../results/mageck/filtering_good_guides_hist.pdf',
-        filtered_tab='../results/mageck/pooled_screen_1_mageck_filtered_guides_v2.tsv',
+        filtered_tab='../results/mageck/SYM101_mageck_filtered_guides_v2.tsv',
         filtered_heatmap=expand('../results/mageck/mageck_guide_filtering_count_matrix_l2fc_heatmap.{ext}', ext=['pdf', 'png']),
-        filtered_counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts_filtered.csv'
+        filtered_counts=TEMPDIR / 'SYM101/SYM101_counts_filtered.csv'
     log:
         notebook="../results/reports/mageck_filter_guides_report.ipynb"
     notebook: 
@@ -496,9 +498,9 @@ rule mageck_filter_guides:
 
 rule bagel2_prepare:
     input:
-        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_{counts}.csv'
+        counts=TEMPDIR / 'SYM101/SYM101_{counts}.csv'
     output:
-        counts=temp(TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_{counts}_bagel2_input_{feature}_{time}_{line}.txt')
+        counts=temp(TEMPDIR / 'SYM101/bagel2/SYM101_{counts}_bagel2_input_{feature}_{time}_{line}.txt')
     wildcard_constraints:
         feature="gene|transcript",
         time="alltimes|TP5TP6",
@@ -545,28 +547,38 @@ rule bagel2_prepare:
         # Save as txt
         sdf.to_csv(output.counts, sep='\t')
 
+rule install_BAGEL_git:
+    output:
+        bagel_py=TEMPDIR / "bagel_software/BAGEL.py",
+        bagel_dir=directory(TEMPDIR / "bagel_software")
+    shell:
+        """
+        cd TEMPDIR
+        git clone https://github.com/hart-lab/bagel bagel_software
+        """
+
 rule bagel2_fc:
     input:
-        bagel_py="/home/peidli/utils/bagel/BAGEL.py", # clone with github
-        bagel_counts=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_{counts}_bagel2_input_{index}.txt'
+        bagel_py=TEMPDIR / "bagel_software/BAGEL.py",
+        bagel_counts=TEMPDIR / 'SYM101/bagel2/SYM101_{counts}_bagel2_input_{index}.txt'
     output:
-        fc=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_{counts}_bagel_{index}.foldchange',
-        norm=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_{counts}_bagel_{index}.normed_readcount'
+        fc=TEMPDIR / 'SYM101/bagel2/SYM101_{counts}_bagel_{index}.foldchange',
+        norm=TEMPDIR / 'SYM101/bagel2/SYM101_{counts}_bagel_{index}.normed_readcount'
     shell:
         """
         # Calculate Fold Changes
         {input.bagel_py} fc -i {input.bagel_counts} \
-            -o {TEMPDIR}/pooled_screen_1/bagel2/pooled_screen_1_{wildcards.counts}_bagel_{wildcards.index} \
+            -o {TEMPDIR}/SYM101/bagel2/SYM101_{wildcards.counts}_bagel_{wildcards.index} \
             -c 1,2,3
         """
 
 rule bagel2_bf:
     input:
-        bagel_py="/home/peidli/utils/bagel/BAGEL.py",
-        fc=TEMPDIR / 'pooled_screen_1/bagel2/pooled_screen_1_{counts}_bagel_{index}.foldchange',
-        bagel_folder="/home/peidli/utils/bagel/",
+        bagel_py=TEMPDIR / "bagel_software/BAGEL.py",
+        fc=TEMPDIR / 'SYM101/bagel2/SYM101_{counts}_bagel_{index}.foldchange',
+        bagel_dir=TEMPDIR / "bagel_software"
     output:
-        bf='../results/bagel2/pooled_screen_1_{counts}_bagel_bf_{index}.tsv'
+        bf='../results/bagel2/SYM101_{counts}_bagel_bf_{index}.tsv'
     shell:
         """
         # Number of columns in input tsv
@@ -578,41 +590,41 @@ rule bagel2_bf:
         # Calculate Bayes Factors
         {input.bagel_py} bf -i {input.fc} \
             -o {output.bf} \
-            -e {input.bagel_folder}/CEGv2.txt \
-            -n {input.bagel_folder}/NEGv1.txt \
+            -e {input.bagel_dir}/CEGv2.txt \
+            -n {input.bagel_dir}/NEGv1.txt \
             -c $S
         """
 
 rule bagel2_pr:
     input:
-        bagel_py="/home/peidli/utils/bagel/BAGEL.py",
-        bf='../results/bagel2/pooled_screen_1_{counts}_bagel_bf_{index}.tsv',
-        bagel_folder="/home/peidli/utils/bagel/",
+        bagel_py=TEMPDIR / "bagel_software/BAGEL.py",
+        bf='../results/bagel2/SYM101_{counts}_bagel_bf_{index}.tsv',
+        bagel_dir=TEMPDIR / "bagel_software"
     output:
-        pr='../results/bagel2/pooled_screen_1_{counts}_bagel_pr_{index}.tsv'
+        pr='../results/bagel2/SYM101_{counts}_bagel_pr_{index}.tsv'
     shell:
         """
         # Calculate Precision-Recall
         {input.bagel_py} pr -i {input.bf} \
             -o {output.pr} \
-            -e {input.bagel_folder}/CEGv2.txt \
-            -n {input.bagel_folder}/NEGv1.txt
+            -e {input.bagel_dir}/CEGv2.txt \
+            -n {input.bagel_dir}/NEGv1.txt
         """
 
 rule bagel2_merge:
     input:
-        pr=expand('../results/bagel2/pooled_screen_1_{{counts}}_bagel_pr_gene_{time}_{line}.tsv', time=['alltimes', 'TP5TP6'], line=['alllines', 'H1975', 'H1299', 'A549'])
+        pr=expand('../results/bagel2/SYM101_{{counts}}_bagel_pr_gene_{time}_{line}.tsv', time=['alltimes', 'TP5TP6'], line=['alllines', 'H1975', 'H1299', 'A549'])
     output:
-        '../results/bagel2/pooled_screen_1_{counts}_bagel_pr_gene.tsv'
+        '../results/bagel2/SYM101_{counts}_bagel_pr_gene.tsv'
     run:
         # merge BAGEL2 results
-        file = f'../results/bagel2/pooled_screen_1_counts_bagel_pr_gene.tsv'
+        file = f'../results/bagel2/SYM101_counts_bagel_pr_gene.tsv'
 
         # aggregate results
         datas = {}
         for line in ['alllines', 'A549', 'H1299', 'H1975']:
             for time in ['alltimes', 'TP5TP6']:
-                tdf = pd.read_table(f'../results/bagel2/pooled_screen_1_{wildcards.counts}_bagel_pr_gene_{time}_{line}.tsv', index_col='Gene')
+                tdf = pd.read_table(f'../results/bagel2/SYM101_{wildcards.counts}_bagel_pr_gene_{time}_{line}.tsv', index_col='Gene')
                 datas[(line, time)] = tdf
         df = pd.concat(datas, axis=1)
 
@@ -621,7 +633,7 @@ rule bagel2_merge:
 
 rule timecourse_clustering:
     input:
-        counts=TEMPDIR / 'pooled_screen_1/pooled_screen_1_counts_filtered.csv'
+        counts=TEMPDIR / 'SYM101/SYM101_counts_filtered.csv'
     output:
         '../results/timecourse/time_series_cluster_profiles_{cell_line}.pdf',
         '../results/timecourse/time_series_cluster_bestprofiles_{cell_line}.pdf',
@@ -650,10 +662,10 @@ rule cas_off_finder:
 
 rule align_guides_to_genome_hisat2:
     input:
-        guide_fasta='../resources/pooled_screen_1_guides.fa',
+        guide_fasta='../resources/SYM101_guides.fa',
         index="/g/huber/users/peidli/utils/genomes/homo_sapiens/grch38"
     output:
-        sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_genome.sam'
+        sam=TEMPDIR / 'SYM101/hisat2/guides_aligned_genome.sam'
     resources:
         time='24:00:00',
         mem_mb=64000,
@@ -671,10 +683,10 @@ rule align_guides_to_genome_hisat2:
 
 rule get_reference_fasta:
     output:
-        TEMPDIR / 'pooled_screen_1/hisat2/gencode.v{version}.transcripts.fa'
+        TEMPDIR / 'SYM101/hisat2/gencode.v{version}.transcripts.fa'
     shell:
         """
-        cd {TEMPDIR}/pooled_screen_1/hisat2/
+        cd {TEMPDIR}/SYM101/hisat2/
         if [ {wildcards.version} -le "19" ]; then
             # merge pc and lncRNA
             wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{wildcards.version}/gencode.v{wildcards.version}.lncRNA_transcripts.fa.gz
@@ -692,9 +704,9 @@ rule get_reference_fasta:
 
 rule hisat2_index_transcriptome:
     input:
-        fasta=TEMPDIR / 'pooled_screen_1/hisat2/gencode.v{version}.transcripts.fa'
+        fasta=TEMPDIR / 'SYM101/hisat2/gencode.v{version}.transcripts.fa'
     output:
-        expand(TEMPDIR / 'pooled_screen_1/hisat2/gencode.v{{version}}.transcripts.{i}.ht2', i=range(1,9))
+        expand(TEMPDIR / 'SYM101/hisat2/gencode.v{{version}}.transcripts.{i}.ht2', i=range(1,9))
     resources:
         time='24:00:00',
         mem_mb=16000,
@@ -703,19 +715,19 @@ rule hisat2_index_transcriptome:
     conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
     shell:
         """
-        cd {TEMPDIR}/pooled_screen_1/hisat2/
+        cd {TEMPDIR}/SYM101/hisat2/
         hisat2-build \
             -p {threads} \
             {input.fasta} \
-            {TEMPDIR}/pooled_screen_1/hisat2/gencode.v{wildcards.version}.transcripts
+            {TEMPDIR}/SYM101/hisat2/gencode.v{wildcards.version}.transcripts
         """
 
 rule align_guides_to_transcriptome_hisat2:
     input:
-        guide_fasta='../resources/pooled_screen_1_guides.fa',
-        index=expand(TEMPDIR / 'pooled_screen_1/hisat2/gencode.{{v}}.transcripts.{i}.ht2', i=range(1,9))
+        guide_fasta='../resources/SYM101_guides.fa',
+        index=expand(TEMPDIR / 'SYM101/hisat2/gencode.{{v}}.transcripts.{i}.ht2', i=range(1,9))
     output:
-        sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_{v}_transcriptome.sam'
+        sam=TEMPDIR / 'SYM101/hisat2/guides_aligned_{v}_transcriptome.sam'
     resources:
         time='24:00:00',
         mem_mb=64000,
@@ -727,7 +739,7 @@ rule align_guides_to_transcriptome_hisat2:
     shell:
         """
         hisat2 -f \
-        -x {TEMPDIR}/pooled_screen_1/hisat2/gencode.{wildcards.v}.transcripts \
+        -x {TEMPDIR}/SYM101/hisat2/gencode.{wildcards.v}.transcripts \
         -U {input.guide_fasta} \
         -S {output.sam} \
         -p {threads} \
@@ -736,11 +748,11 @@ rule align_guides_to_transcriptome_hisat2:
 
 rule annotate_exon_number:
     input:
-        sam=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_{version_and_feature}.sam',
+        sam=TEMPDIR / 'SYM101/hisat2/guides_aligned_{version_and_feature}.sam',
         gtf='/g/huber/users/peidli/utils/genomes/homo_sapiens/Homo_sapiens.GRCh38.111.gtf'  #TODO: Question do I need to adapt to reference?
     output:
-        annotated_csv=TEMPDIR / 'pooled_screen_1/hisat2/guides_aligned_{version_and_feature}_annotated.csv',
-        series=TEMPDIR / 'pooled_screen_1/hisat2/exon_numbers_{version_and_feature}.csv'
+        annotated_csv=TEMPDIR / 'SYM101/hisat2/guides_aligned_{version_and_feature}_annotated.csv',
+        series=TEMPDIR / 'SYM101/hisat2/exon_numbers_{version_and_feature}.csv'
     resources:
         time='10:00:00',
         mem_mb=64000,
@@ -756,11 +768,11 @@ rule annotate_exon_number:
 
 rule crispr_cleanr_prepare_inputs:
     input:
-        guides='/scratch/peidli/SYMPHONY/pooled_screen_1/hisat2/guides_aligned_to_genome_annotated.csv',
-        counts='/scratch/peidli/SYMPHONY/pooled_screen_1/pooled_screen_1_counts.csv'
+        guides='/scratch/peidli/SYMPHONY/SYM101/hisat2/guides_aligned_to_genome_annotated.csv',
+        counts='/scratch/peidli/SYMPHONY/SYM101/SYM101_counts.csv'
     output:
-        guides='/scratch/peidli/SYMPHONY/pooled_screen_1/crisprcleanr/guide_alignment_genome_annotated_for_crisprcleanr.csv',
-        counts=expand('/scratch/peidli/SYMPHONY/pooled_screen_1/crisprcleanr/pooled_screen_1_counts_for_cleaner_TP6_{line}.tsv', line=cell_lines)
+        guides='/scratch/peidli/SYMPHONY/SYM101/crisprcleanr/guide_alignment_genome_annotated_for_crisprcleanr.csv',
+        counts=expand('/scratch/peidli/SYMPHONY/SYM101/crisprcleanr/SYM101_counts_for_cleaner_TP6_{line}.tsv', line=cell_lines)
     run:
         import numpy as np
 
@@ -799,19 +811,19 @@ rule crispr_cleanr_prepare_inputs:
             idx = [True] + list(((cell_line == cl) & (time_point == 'TP6')) | (time_point == 'Pool'))
             counts_ = counts.iloc[:, idx]
             assert counts_.shape[1] == 4 + 3
-            counts_.to_csv(TEMPDIR / f'pooled_screen_1/crisprcleanr/pooled_screen_1_counts_for_cleaner_TP6_{cl}.tsv', sep='\t')
+            counts_.to_csv(TEMPDIR / f'SYM101/crisprcleanr/SYM101_counts_for_cleaner_TP6_{cl}.tsv', sep='\t')
 
 rule crispr_cleanr:
     input:
-        guides=TEMPDIR / 'pooled_screen_1/crisprcleanr/guide_alignment_genome_annotated_for_crisprcleanr.csv',
-        counts=TEMPDIR / 'pooled_screen_1/crisprcleanr/pooled_screen_1_counts_for_cleaner_TP6_{line}.tsv'
+        guides=TEMPDIR / 'SYM101/crisprcleanr/guide_alignment_genome_annotated_for_crisprcleanr.csv',
+        counts=TEMPDIR / 'SYM101/crisprcleanr/SYM101_counts_for_cleaner_TP6_{line}.tsv'
     output:
-        corrlogFC=TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_corrected_logFCs.csv',
-        logFC=TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_original_logFCs.csv',
-        segments=TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_segments.csv',
-        sortedsgRNAs=TEMPDIR / 'pooled_screen_1/crisprcleanr/{line}_SORTED_sgRNAs.csv'
+        corrlogFC=TEMPDIR / 'SYM101/crisprcleanr/{line}_corrected_logFCs.csv',
+        logFC=TEMPDIR / 'SYM101/crisprcleanr/{line}_original_logFCs.csv',
+        segments=TEMPDIR / 'SYM101/crisprcleanr/{line}_segments.csv',
+        sortedsgRNAs=TEMPDIR / 'SYM101/crisprcleanr/{line}_SORTED_sgRNAs.csv'
     params:
-        outdir=TEMPDIR / 'pooled_screen_1/crisprcleanr/crisprcleanr',
+        outdir=TEMPDIR / 'SYM101/crisprcleanr/crisprcleanr',
         min_width=2, # default is 2
         min_ngenes=15  # I checked, this is not genes but guides. We have 5 - 7 guides per gene, so this needs to be 15 - 21, default is 3
     conda: "crisprcleanr_env"  # "../environments/crisprcleanr_env.yaml"

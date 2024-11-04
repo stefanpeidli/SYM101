@@ -1,1 +1,0 @@
-# https://nf-co.re/crisprseq/2.1.0
