@@ -3,7 +3,6 @@ name: mageck_env
 channels:
  - conda-forge
  - bioconda
- - defaults
 
 dependencies:
   - bioconda::mageck=0.5.9.5

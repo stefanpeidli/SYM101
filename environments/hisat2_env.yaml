@@ -2,7 +2,6 @@ name: hisat2_env
 
 channels:
  - bioconda
- - defaults
 
 dependencies:
   - bioconda::hisat2=2.2.1
