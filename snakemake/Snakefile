@@ -17,12 +17,14 @@ Description:
     - Downstream processing
         - Runs MAGeCK
         - Runs BAGEL2
-        - TODO: get scripts for Gscreend
+        - TODO: get scripts for Gscreend (she will do)
         - Time series clustering
     - Align Guides and Check Copy Number effect
         - Run cas-offinder to find off-targets
         - Align the guides to the genome with HISAT2
         - Run CRISPRcleanR to detect CNEs
+    TODO: split into multiple snakefiles once done!
+    TODO: check if for all plots I have source data exported
     All user configuration is done in the configuration/config.yaml file.
 """
 
@@ -65,7 +67,7 @@ rule all:
         # ## BAGEL2
         # expand('../results/bagel2/SYM101_{counts}_bagel_pr_gene.tsv', counts=['counts', 'counts_filtered']),
 
-        # ## Timeseries clustering
+        # ## Timeseries clustering TODO: make script?
         # expand('../results/timecourse/timecourse_clusters_{cell_line}.csv', cell_line=cell_lines),
 
         # # Align Guides and Check Copy Number effect
@@ -219,7 +221,7 @@ rule hisat2_guide_index:
     conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
     shell:
         """
-        hisat2-build -p {threads} {input} {output}
+        hisat2-build -p {threads} {input} {TEMPDIR}/hisat2/index
         """
 
 rule hisat2_align:
@@ -494,11 +496,9 @@ rule mageck_filter_guides:
         filtered_tab='../results/mageck/SYM101_mageck_filtered_guides_v2.tsv',
         filtered_heatmap=expand('../results/mageck/mageck_guide_filtering_count_matrix_l2fc_heatmap.{ext}', ext=['pdf', 'png']),
         filtered_counts=TEMPDIR / 'SYM101_counts_filtered.csv'
-    conda: "../environments/py_env.yaml"
-    log:
-        notebook="../results/reports/mageck_filter_guides_report.ipynb"
-    notebook: 
-        'scripts/mageck_filter_guides.py.ipynb'
+    conda: "py_env" # "../environments/py_env.yaml"
+    script:
+        'scripts/snake_mageck_filter_guides.py'
 
 rule bagel2_prepare:
     input:
