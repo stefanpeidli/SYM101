@@ -9,7 +9,7 @@ cell_lines:
   02: 'H1299'
   03: 'A549'
 basespace_run_id: 274149887
-basespace_project_ids: # TODO: replace with GEO eventually
+basespace_project_ids: # TODO: replace with ENA eventually
   Symphony: 402672358
   Unindexed Reads: 402688291
   Symphony_Repeat: 403174211

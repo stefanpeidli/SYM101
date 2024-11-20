@@ -23,7 +23,6 @@ Description:
         - Run cas-offinder to find off-targets
         - Align the guides to the genome with HISAT2
         - Run CRISPRcleanR to detect CNEs
-    TODO: split into multiple snakefiles once done!
     TODO: check if for all plots I have source data exported
     All user configuration is done in the configuration/config.yaml file.
 """
