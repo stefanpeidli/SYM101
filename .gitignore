@@ -5,6 +5,7 @@ stringdb_ppi.tsv.gz
 logs
 *.gene_summary.txt
 *.sgrna_summary.txt
+data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
