@@ -17,8 +17,9 @@ Description:
     - Downstream processing
         - Runs MAGeCK
         - Runs BAGEL2
-        - TODO: get scripts for Gscreend (she will do)
+        - Runs Gscreend
         - Time series clustering
+        # TODO: error in mageck filter guides!
     - Align Guides and Check Copy Number effect
         - Run cas-offinder to find off-targets
         - Align the guides to the genome with HISAT2
@@ -46,6 +47,12 @@ assert len(sample_names) == 6*(3*3) + 3, f"Expected 57 (6TP x 3lines x 3reps + 3
 guide_df = pd.read_csv('../resources/all_gRNA_data.csv', index_col='unique_guide_name')
 cell_line_dict = config['cell_lines']
 cell_lines = list(cell_line_dict.values())
+ena_sample_mapping = pd.read_csv("../resources/ENA/ENA_samples_PRJEB82598.tsv", index_col=15, sep='\t')
+sample_long_to_short = {x: x.split('_')[0] for x in sample_names} # long name includes _SXX sample number suffix
+# print(ena_sample_mapping.head())
+# print("sym-02-03-TP1" in ena_sample_mapping.index)
+# print(ena_sample_mapping.index.unique())
+# TODO: WARNING, there are samples missing on ENA. Will have to append them.
 
 ### Define Outputs of this Workflow ###
 rule all:
@@ -54,7 +61,7 @@ rule all:
         "../results/multiqc/multiqc.html",
         "../results/trimming/trimmed_summary.csv",
         TEMPDIR / 'SYM101_counts.csv',
-        TEMPDIR / 'SYM101_counts_filtered.csv',  # removed "bad" guides identified with MAGeCK
+        TEMPDIR / 'SYM101_counts_filtered.csv',  # removed "bad" guides identified with MAGeCK, #TODO!
 
         # # Statistical Analysis
         # ## MAGeCK test
@@ -65,6 +72,9 @@ rule all:
         #     feature=['gene', 'transcript'], time_key=['alltimes', 'TP1', 'TP2', 'TP3', 'TP4', 'TP5','TP6'], counts=['counts', 'counts_filtered']),
         # ## BAGEL2
         # expand('../results/bagel2/SYM101_{counts}_bagel_pr_gene.tsv', counts=['counts', 'counts_filtered']),
+        ## Gscreend
+        expand('../results/gscreend/{feature}_SYM101_{counts}_{cell_line}_gscreend_results.tsv',
+               feature=['gene', 'transcript'], counts=['counts', 'counts_filtered'], cell_line=cell_lines),
 
         # ## Timeseries clustering TODO: make script?
         # expand('../results/timecourse/timecourse_clusters_{cell_line}.csv', cell_line=cell_lines),
@@ -78,26 +88,17 @@ rule all:
         
 
 ### Read processing and quantification ###
-rule download_fastq_bs:
-    output:
-        expand(TEMPDIR / 'fastq/{sample}_L00{i}_R1_001.fastq', sample=sample_names, i=[1,2])
-    resources:
-        time='12:00:00',
-        mem_mb=64000,
-        disk_mb=64000,
-    shell:
-        """
-        bs download appsession -v --id=715537995 --extension=fastq.gz -o {TEMPDIR}/fastq/
-        cd {TEMPDIR}/fastq/
-        # fastq files seem redundantly available in the subfolders
-        rm -r *_L00*_ds.*
-        # move all fastq files to main folder
-        mv *_ds.*/*.fastq.gz .
-        # remove empty subfolders
-        rm -r *_ds.*
-        # unzip
-        gunzip *.gz
-        """
+# rule download_fastq_ena:
+#     # TODO: SAMPLES MISSING!
+#     output:
+#         TEMPDIR / 'fastq/{sample}_L00{i}_R1_001.fastq'
+#     params:
+#         accession=lambda wildcards: ena_sample_mapping.loc[sample_long_to_short[wildcards.sample], 'run_accession'],
+#         short_name=lambda wildcards: sample_long_to_short[wildcards.sample],
+#     shell:
+#         """
+#         wget ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR139/{params.accession}/{params.short_name}_L00{i}_R1_001.fastq.gz -O {output}
+#         """
 
 rule fastqc:
     input:
@@ -272,7 +273,7 @@ rule count:
     threads: 4
     conda: "samtools_env"  # "../environments/samtools_env.yaml"
     script:
-        "scripts/count_reads.sh"
+        "scripts/snake_count_reads.sh"
 
 rule merge_counts:
     input:
@@ -495,7 +496,7 @@ rule mageck_filter_guides:
         filtered_tab='../results/mageck/SYM101_mageck_filtered_guides_v2.tsv',
         filtered_heatmap=expand('../results/mageck/mageck_guide_filtering_count_matrix_l2fc_heatmap.{ext}', ext=['pdf', 'png']),
         filtered_counts=TEMPDIR / 'SYM101_counts_filtered.csv'
-    conda: "py_env" # "../environments/py_env.yaml"
+    conda: "../environments/py_env.yaml"
     script:
         'scripts/snake_mageck_filter_guides.py'
 
@@ -645,6 +646,17 @@ rule timecourse_clustering:
         notebook="logs/notebooks/snake_timecourse_processed_{cell_line}.ipynb"
     notebook:
         "scripts/snake_timecourse.py.ipynb"
+
+rule gscreend:
+    input:
+        counts=TEMPDIR / 'SYM101_{counts}.csv'
+    output:
+        '../results/gscreend/{feature}_SYM101_{counts}_{cell_line}_gscreend_results.tsv'
+    conda: "gscreend_env"  # "../environments/gscreend_env.yaml"
+    wildcard_constraints:
+        counts="counts|counts_filtered"
+    script:
+        "scripts/snake_gscreend.R"
 
 ### Align Guides and Check Copy Number effect ###
 rule cas_off_finder:
