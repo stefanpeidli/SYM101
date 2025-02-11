@@ -848,5 +848,33 @@ rule crispr_cleanr:
         disk_mb=32000
     script: "scripts/snake_crisprcleanr.R"
 
+### Check if there are mutations in the guide target regions ###
+rule retrieve_snps:
+    # NOTE: wget and curl fail here. Solved this by manual download with browser.
+    output:
+        TEMPDIR / 'mutations/{cell_line}_Sanger_wes_snp_vaf.caveman_c.annot_drv.vcf.gz'
+    params:
+        SIDM=lambda wildcards: config['Line_to_SIDM'][wildcards.cell_line]  # get SIDM from config
+    shell:
+        "wget https://cog.sanger.ac.uk/cmp/data/{params.SIDM}_Sanger_wes_snp_vaf.caveman_c.annot_drv.vcf.gz -O {output}"
+
+rule retrieve_indels:
+    # NOTE: wget and curl fail here. Solved this by manual download with browser.
+    output:
+        TEMPDIR / 'mutations/{cell_line}_Sanger_wes_indel_vaf.caveman_c.annot_drv.vcf.gz'
+    params:
+        SIDM=lambda wildcards: config['Line_to_SIDM'][wildcards.cell_line]  # get SIDM from config
+    shell:
+        "wget https://cog.sanger.ac.uk/cmp/data/{params.SIDM}_Sanger_wes_indel_vaf.pindel.annot_drv.vcf.gz -O {output}"
+
+rule merge_mutations:
+    input:
+        snps=TEMPDIR / 'mutations/{cell_line}_Sanger_wes_snp_vaf.caveman_c.annot_drv.vcf.gz',
+        indels=TEMPDIR / 'mutations/{cell_line}_Sanger_wes_indel_vaf.caveman_c.annot_drv.vcf.gz',
+    output:
+        '../results/mutations/{cell_line}_Sanger_wes_mutations.vcf'
+    shell:
+        "bcftools merge {input.snps} {input.indels} -o {output}"
+
 onsuccess: 
     print("Snakemake is done!")
