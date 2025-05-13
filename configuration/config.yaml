@@ -18,3 +18,8 @@ basespace_project_ids: # TODO: replace with ENA eventually
   Unindexed Reads: 402688291
   Symphony_Repeat: 403174211
   Cas13_screens_1: 408146834
+cell_line_colors:
+  A549: 'tab:green'
+  H1299: 'tab:orange'
+  H1975: 'tab:blue'
+  pool: 'tab:gray'
