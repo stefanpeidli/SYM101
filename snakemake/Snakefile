@@ -61,7 +61,8 @@ rule all:
         "../results/multiqc/multiqc.html",
         "../results/trimming/trimmed_summary.csv",
         TEMPDIR / 'SYM101_counts.csv',
-        TEMPDIR / 'SYM101_counts_filtered.csv',  # removed "bad" guides identified with MAGeCK, #TODO!
+        TEMPDIR / 'SYM101_counts_filtered.csv',  # removed "bad" guides identified with MAGeCK
+        TEMPDIR / 'SYM101_counts_corrected.csv',  # corrected sample swap
 
         # # Statistical Analysis
         # ## MAGeCK test
@@ -294,6 +295,17 @@ rule merge_counts:
         df = df.groupby('sample_name').sum().T
         for c in df.columns: df[c] = df[c].astype('int64')  # make integer
         df = pd.merge(guide_df, df, how='right', left_index=True, right_index=True)  # add guide info
+        df.to_csv(output[0])
+
+rule correct_sample_swap:
+    input:
+        TEMPDIR / 'SYM101_counts.csv'
+    output:
+        TEMPDIR / 'SYM101_counts_corrected.csv'
+    run:
+        # Correct sample swap
+        df = pd.read_csv(input[0], index_col=0)
+        df = df.rename({'sym-01-01-TP6' : 'sym-01-02-TP6', 'sym-01-02-TP6' : 'sym-01-01-TP6'}, axis=1)  # revert sample swap
         df.to_csv(output[0])
 
 ### Statistical Analysis ###
