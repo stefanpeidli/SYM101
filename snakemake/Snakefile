@@ -64,31 +64,31 @@ rule all:
         TEMPDIR / 'SYM101_counts_filtered.csv',  # removed "bad" guides identified with MAGeCK
         TEMPDIR / 'SYM101_counts_corrected.csv',  # corrected sample swap
 
-        # # Statistical Analysis
+        # Statistical Analysis
         # ## MAGeCK test
         # expand('../results/mageck/summaries/{line}/{feature}_SYM101_{counts}_mageck.sgrna_summary.txt', 
         #     line=['alllines', 'H1975', 'H1299', 'A549'], counts=['counts', 'counts_filtered'], feature=['gene', 'transcript']),
+        # '../results/mageck/SYM101_mageck_filtered_guides_v2.tsv'
         # ## MAGeCK MLE
         # expand('../results/mageck/summaries/{feature}_{time_key}_SYM101_{counts}_mageck_mle.sgrna_summary.txt', 
         #     feature=['gene', 'transcript'], time_key=['alltimes', 'TP1', 'TP2', 'TP3', 'TP4', 'TP5','TP6'], counts=['counts', 'counts_filtered']),
         # ## BAGEL2
         # expand('../results/bagel2/SYM101_{counts}_bagel_pr_gene.tsv', counts=['counts', 'counts_filtered']),
-        ## Gscreend
-        expand('../results/gscreend/{feature}_SYM101_{counts}_{cell_line}_gscreend_results.tsv',
-               feature=['gene', 'transcript'], counts=['counts', 'counts_filtered'], cell_line=cell_lines),
+        # ## Gscreend
+        # expand('../results/gscreend/{feature}_SYM101_{counts}_{cell_line}_gscreend_results.tsv',
+        #        feature=['gene', 'transcript'], counts=['counts', 'counts_filtered'], cell_line=cell_lines),
 
-        # ## Timeseries clustering TODO: make script?
+        # ## Timeseries clustering TODO: make script? currently jnb
+        #TODO: add environment
         # expand('../results/timecourse/timecourse_clusters_{cell_line}.csv', cell_line=cell_lines),
 
-        # # Align Guides and Check Copy Number effect
-        # # "../results/tables/cas_off_finder.txt",
-        # expand(TEMPDIR / 'crisprcleanr/{line}_corrected_logFCs.csv', line=cell_lines),
-        # TEMPDIR / 'hisat2/guides_aligned_v45_transcriptome_annotated.csv',
-        # TEMPDIR / 'hisat2/guides_aligned_v19_transcriptome_annotated.csv',
-        # '../results/mageck/SYM101_mageck_filtered_guides_v2.tsv'
+        # Align Guides and Check Copy Number effect
+        # "../results/tables/cas_off_finder.txt",
+        TEMPDIR / 'hisat2/guides_aligned_v48_genome_spliceaware.sam',
+        expand('../results/mutations/{cell_line}_Sanger_wes_mutations.vcf', cell_line=cell_lines),
+        
         
 
-### Read processing and quantification ###
 # rule download_fastq_ena:
 #     # TODO: SAMPLES MISSING!
 #     output:
@@ -101,6 +101,8 @@ rule all:
 #         wget ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR139/{params.accession}/{params.short_name}_L00{i}_R1_001.fastq.gz -O {output}
 #         """
 
+
+### Read processing and quantification ###
 rule fastqc:
     input:
         TEMPDIR / 'fastq/{sample}_L00{i}_R1_001.fastq'
@@ -508,7 +510,7 @@ rule mageck_filter_guides:
         filtered_tab='../results/mageck/SYM101_mageck_filtered_guides_v2.tsv',
         filtered_heatmap=expand('../results/mageck/mageck_guide_filtering_count_matrix_l2fc_heatmap.{ext}', ext=['pdf', 'png']),
         filtered_counts=TEMPDIR / 'SYM101_counts_filtered.csv'
-    conda: "../environments/py_env.yaml"
+    conda: "../environments/sym101py_env.yaml"
     script:
         'scripts/snake_mageck_filter_guides.py'
 
@@ -671,69 +673,84 @@ rule gscreend:
         "scripts/snake_gscreend.R"
 
 ### Align Guides and Check Copy Number effect ###
-rule cas_off_finder:
-    input:
-        "../resources/guide_list_casoffinder.txt"
+# TODO: not sure if this is applicable to Cas13
+# rule cas_off_finder:
+#     input:
+#         "../resources/guide_list_casoffinder.txt"
+#     output:
+#         "../results/tables/cas_off_finder.txt"
+#     resources:
+#         time='24:00:00',
+#         mem_mb=64000,
+#         disk_mb=64000
+#     conda:
+#         "offtarget_env"
+#     shell:
+#         """
+#         cas-offinder {input} C {output}
+#         """
+
+rule get_reference_fasta:
     output:
-        "../results/tables/cas_off_finder.txt"
-    resources:
-        time='24:00:00',
-        mem_mb=64000,
-        disk_mb=64000
-    conda:
-        "offtarget_env"
+        TEMPDIR / 'hisat2/GRCh38.primary_assembly.genome.fa'
+    wildcard_constraints:
+        version="48"  # TODO: this does not work for v19, is GRCh37
     shell:
         """
-        cas-offinder {input} C {output}
+        cd {TEMPDIR}/hisat2/
+        wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{wildcards.version}/GRCh38.primary_assembly.genome.fa.gz
+        gunzip GRCh38.primary_assembly.genome.fa.gz
         """
 
-rule align_guides_to_genome_hisat2:
-    input:
-        guide_fasta='../resources/SYM101_guides.fa',
-        index="/g/huber/users/peidli/utils/genomes/homo_sapiens/grch38"
+rule get_reference_gtf:
     output:
-        sam=TEMPDIR / 'hisat2/guides_aligned_genome.sam'
+        TEMPDIR / 'hisat2/gencode.v{version}.annotation.gtf'
+    shell:
+        """
+        cd {TEMPDIR}/hisat2/
+        wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{wildcards.version}/gencode.v{wildcards.version}.annotation.gtf.gz
+        gunzip gencode.v{wildcards.version}.annotation.gtf.gz
+        """
+
+rule extract_splice_sites:
+    input:
+        gtf=TEMPDIR / 'hisat2/gencode.v{version}.annotation.gtf'
+    output:
+        txt=TEMPDIR / 'hisat2/splicesites_v{version}.txt'
     resources:
         time='24:00:00',
-        mem_mb=64000,
-        disk_mb=64000
+        mem_mb=16000,
+        disk_mb=16000
     threads: 8
     conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
     shell:
         """
-        hisat2 -f \
-        -x {input.index}/genome \
-        -U {input.guide_fasta} \
-        -S {output.sam} \
-        -p {threads}
+        hisat2_extract_splice_sites.py {input.gtf} > {output.txt}
         """
 
-rule get_reference_fasta:
+rule extract_exons:
+    input:
+        gtf=TEMPDIR / 'hisat2/gencode.v{version}.annotation.gtf'
     output:
-        TEMPDIR / 'hisat2/gencode.v{version}.transcripts.fa'
+        txt=TEMPDIR / 'hisat2/exons_v{version}.txt'
+    resources:
+        time='24:00:00',
+        mem_mb=16000,
+        disk_mb=16000
+    threads: 8
+    conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
     shell:
         """
-        cd {TEMPDIR}/hisat2/
-        if [ {wildcards.version} -le "19" ]; then
-            # merge pc and lncRNA
-            wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{wildcards.version}/gencode.v{wildcards.version}.lncRNA_transcripts.fa.gz
-            wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{wildcards.version}/gencode.v{wildcards.version}.pc_transcripts.fa.gz
-            gunzip gencode.v{wildcards.version}.lncRNA_transcripts.fa.gz
-            gunzip gencode.v{wildcards.version}.pc_transcripts.fa.gz
-            cat gencode.v{wildcards.version}.lncRNA_transcripts.fa \
-                gencode.v{wildcards.version}.pc_transcripts.fa \
-                > gencode.v{wildcards.version}.transcripts.fa
-        else
-            wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{wildcards.version}/gencode.v{wildcards.version}.transcripts.fa.gz
-            gunzip gencode.v{wildcards.version}.transcripts.fa.gz
-        fi
+        hisat2_extract_exons.py {input.gtf} > {output.txt}
         """
 
-rule hisat2_index_transcriptome:
+rule hisat2_index:
     input:
-        fasta=TEMPDIR / 'hisat2/gencode.v{version}.transcripts.fa'
+        fasta=TEMPDIR / 'hisat2/GRCh38.primary_assembly.genome.fa',
+        splicesites=TEMPDIR / 'hisat2/splicesites_v{version}.txt',
+        exons=TEMPDIR / 'hisat2/exons_v{version}.txt'
     output:
-        expand(TEMPDIR / 'hisat2/gencode.v{{version}}.transcripts.{i}.ht2', i=range(1,9))
+        expand(TEMPDIR / 'hisat2/grch38_gencode_v{{version}}_splice_index.{i}.ht2', i=range(1,9))
     resources:
         time='24:00:00',
         mem_mb=16000,
@@ -745,120 +762,64 @@ rule hisat2_index_transcriptome:
         cd {TEMPDIR}/hisat2/
         hisat2-build \
             -p {threads} \
+            --ss {input.splicesites} \
+            --exon {input.exons} \
             {input.fasta} \
-            {TEMPDIR}/hisat2/gencode.v{wildcards.version}.transcripts
+            grch38_gencode_v{wildcards.version}_splice_index
         """
 
-rule align_guides_to_transcriptome_hisat2:
+rule hisat2_align_to_genome:
     input:
         guide_fasta='../resources/SYM101_guides.fa',
-        index=expand(TEMPDIR / 'hisat2/gencode.{{v}}.transcripts.{i}.ht2', i=range(1,9))
+        index=expand(TEMPDIR / 'hisat2/grch38_gencode_v{{version}}_splice_index.{i}.ht2', i=range(1,9))
     output:
-        sam=TEMPDIR / 'hisat2/guides_aligned_{v}_transcriptome.sam'
+        sam=TEMPDIR / 'hisat2/guides_aligned_v{version}_genome_spliceaware.sam'
     resources:
         time='24:00:00',
         mem_mb=64000,
         disk_mb=64000
     params:
-        max_multihits=50  # definitely high enough fpr v19. Biggest value I saw was around 25 alignments for a single guide.
+        max_multihits=50  # definitely high enough for v19. Biggest value I saw was around 25 alignments for a single guide.
     threads: 8
     conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
     shell:
         """
+        # Params optimized for small reads and splice-aware alignment
         hisat2 -f \
-        -x {TEMPDIR}/hisat2/gencode.{wildcards.v}.transcripts \
+        -x {TEMPDIR}/hisat2/grch38_gencode_v{wildcards.version}_splice_index \
         -U {input.guide_fasta} \
         -S {output.sam} \
         -p {threads} \
-        -k {params.max_multihits}
+        -k {params.max_multihits} \
+        --no-softclip \
+        --seed-len 16 \
+        --min-seed-len 12 \
+        --mp 6,2 \
+        --sp 3,1
         """
 
-rule annotate_exon_number:
-    input:
-        sam=TEMPDIR / 'hisat2/guides_aligned_{version_and_feature}.sam',
-        gtf='/g/huber/users/peidli/utils/genomes/homo_sapiens/Homo_sapiens.GRCh38.111.gtf'  #TODO: Question do I need to adapt to reference?
-    output:
-        annotated_csv=TEMPDIR / 'hisat2/guides_aligned_{version_and_feature}_annotated.csv',
-        series=TEMPDIR / 'hisat2/exon_numbers_{version_and_feature}.csv'
-    resources:
-        time='10:00:00',
-        mem_mb=64000,
-        disk_mb=64000
-    shell:
-        """
-        python scripts/annotate_exon_number.py \
-            -i {input.sam} \
-            -g {input.gtf} \
-            -o {output.annotated_csv} \
-            -x {output.series}
-        """
-
-rule crispr_cleanr_prepare_inputs:
-    input:
-        guides=TEMPDIR / 'hisat2/guides_aligned_to_genome_annotated.csv',
-        counts=TEMPDIR / 'SYM101_counts.csv'
-    output:
-        guides=TEMPDIR / 'crisprcleanr/guide_alignment_genome_annotated_for_crisprcleanr.csv',
-        counts=expand(TEMPDIR / 'crisprcleanr/SYM101_counts_for_cleaner_TP6_{line}.tsv', line=cell_lines)
-    run:
-        import numpy as np
-
-        # Process guide info
-        dat = pd.read_csv(input.guides, index_col=0)
-        sdat = dat[dat.MappingQuality > 1]
-        sdat.rename(columns={'ReferenceName': 'CHRM', 
-                            'Position': 'STARTpos', 
-                            'End': 'ENDpos',
-                            'Sequence': 'seq',
-                            'exon_number': 'EXONE',
-                            }, inplace=True)
-        flag_to_strand = {
-            0: 'sense',   # Forward strand
-            16: 'antisense',  # Reverse strand
-        }
-        sdat['STRAND'] = sdat.Flag.map(flag_to_strand)
-        sdat['GENES'] = sdat.index.str.split('_').str[0]
-        sdat.index.name = 'CODE'
-        sdat.EXONE = sdat.EXONE.fillna(0).astype(int)
-        sdat = sdat[['GENES', 'CHRM', 'STARTpos', 'ENDpos', 'STRAND', 'EXONE', 'seq']]
-        sdat.to_csv(output.guides)
-        
-        # Save counts
-        counts = pd.read_csv(input.counts, index_col=0)
-        counts = counts[['Gene'] + list(counts.columns[12:])]
-        counts.index.name = 'sgRNA'
-        counts.rename(columns={'Gene': 'gene'}, inplace=True)
-        cell_line = np.array([x.split('-')[1] for x in counts.columns[1:]])
-        cell_line = np.array([cell_line_dict[int(x)] if 'pool' not in x else 'Pool' for x in cell_line])
-        replicate = np.array([x.split('-')[2] if 'pool' not in x else '0'+x[-5] for x in counts.columns[1:]])
-        time_point = np.array([x.split('-')[3][:3] if 'pool' not in x else 'Pool' for x in counts.columns[1:]])
-        # Save each cell line separately
-        # Only use TP6 for now
-        for cl in cell_line_dict.values():
-            idx = [True] + list(((cell_line == cl) & (time_point == 'TP6')) | (time_point == 'Pool'))
-            counts_ = counts.iloc[:, idx]
-            assert counts_.shape[1] == 4 + 3
-            counts_.to_csv(TEMPDIR / f'crisprcleanr/SYM101_counts_for_cleaner_TP6_{cl}.tsv', sep='\t')
-
-rule crispr_cleanr:
-    input:
-        guides=TEMPDIR / 'crisprcleanr/guide_alignment_genome_annotated_for_crisprcleanr.csv',
-        counts=TEMPDIR / 'crisprcleanr/SYM101_counts_for_cleaner_TP6_{line}.tsv'
-    output:
-        corrlogFC=TEMPDIR / 'crisprcleanr/{line}_corrected_logFCs.csv',
-        logFC=TEMPDIR / 'crisprcleanr/{line}_original_logFCs.csv',
-        segments=TEMPDIR / 'crisprcleanr/{line}_segments.csv',
-        sortedsgRNAs=TEMPDIR / 'crisprcleanr/{line}_SORTED_sgRNAs.csv'
-    params:
-        outdir=TEMPDIR / 'crisprcleanr/crisprcleanr',
-        min_width=2, # default is 2
-        min_ngenes=15  # I checked, this is not genes but guides. We have 5 - 7 guides per gene, so this needs to be 15 - 21, default is 3
-    conda: "crisprcleanr_env"  # "../environments/crisprcleanr_env.yaml"
-    resources:
-        time='1:00:00',
-        mem_mb=32000,
-        disk_mb=32000
-    script: "scripts/snake_crisprcleanr.R"
+# TODO: review this rule
+# rule annotate_exon_number:
+#     input:
+#         sam=TEMPDIR / 'hisat2/guides_aligned_{version_and_feature}.sam',
+#         gtf='/g/huber/users/peidli/utils/genomes/homo_sapiens/Homo_sapiens.GRCh38.111.gtf'  #TODO: Question do I need to adapt to reference?
+#     output:
+#         annotated_csv=TEMPDIR / 'hisat2/guides_aligned_{version_and_feature}_annotated.csv',
+#         series=TEMPDIR / 'hisat2/exon_numbers_{version_and_feature}.csv'
+#     wildcard_constraints:
+#         version_and_feature="v45_transcriptome|v19_transcriptome"
+#     resources:
+#         time='10:00:00',
+#         mem_mb=64000,
+#         disk_mb=64000
+#     shell:
+#         """
+#         python scripts/annotate_exon_number.py \
+#             -i {input.sam} \
+#             -g {input.gtf} \
+#             -o {output.annotated_csv} \
+#             -x {output.series}
+#         """
 
 ### Check if there are mutations in the guide target regions ###
 rule retrieve_snps:

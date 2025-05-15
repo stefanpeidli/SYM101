@@ -12,6 +12,11 @@ Line_to_SIDM:
   - A549: SIDM00903
   - H1299: SIDM00649
   - H1975: SIDM00759
+lines_to_depmap_model_ids:
+  HT29: ACH-000552
+  H1975: ACH-000587
+  H1299: ACH-000510
+  A549: ACH-000681
 basespace_run_id: 274149887
 basespace_project_ids: # TODO: replace with ENA eventually
   Symphony: 402672358
