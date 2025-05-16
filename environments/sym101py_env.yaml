@@ -23,5 +23,7 @@ dependencies:
   - conda-forge::openpyxl
   - conda-forge::adjusttext
   - conda-forge::statannotations
+  - bioconda::pysam
+  - bioconda::pyranges
   - pip:
     - PyComplexHeatmap==1.6.6

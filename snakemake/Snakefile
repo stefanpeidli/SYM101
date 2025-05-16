@@ -85,7 +85,7 @@ rule all:
         # Align Guides and Check Copy Number effect
         # "../results/tables/cas_off_finder.txt",
         TEMPDIR / 'hisat2/guides_aligned_v48_genome_spliceaware.sam',
-        expand('../results/mutations/{cell_line}_Sanger_wes_mutations.vcf', cell_line=cell_lines),
+        # expand('../results/mutations/{cell_line}_Sanger_wes_mutations.vcf', cell_line=cell_lines),
         
         
 
@@ -719,8 +719,8 @@ rule extract_splice_sites:
         txt=TEMPDIR / 'hisat2/splicesites_v{version}.txt'
     resources:
         time='24:00:00',
-        mem_mb=16000,
-        disk_mb=16000
+        mem_mb=64000,
+        disk_mb=64000
     threads: 8
     conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
     shell:
@@ -735,8 +735,8 @@ rule extract_exons:
         txt=TEMPDIR / 'hisat2/exons_v{version}.txt'
     resources:
         time='24:00:00',
-        mem_mb=16000,
-        disk_mb=16000
+        mem_mb=64000,
+        disk_mb=64000
     threads: 8
     conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
     shell:
@@ -753,9 +753,9 @@ rule hisat2_index:
         expand(TEMPDIR / 'hisat2/grch38_gencode_v{{version}}_splice_index.{i}.ht2', i=range(1,9))
     resources:
         time='24:00:00',
-        mem_mb=16000,
-        disk_mb=16000
-    threads: 8
+        mem_mb=200000,
+        disk_mb=200000
+    threads: 16
     conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
     shell:
         """
@@ -776,11 +776,11 @@ rule hisat2_align_to_genome:
         sam=TEMPDIR / 'hisat2/guides_aligned_v{version}_genome_spliceaware.sam'
     resources:
         time='24:00:00',
-        mem_mb=64000,
-        disk_mb=64000
+        mem_mb=200000,
+        disk_mb=200000
     params:
         max_multihits=50  # definitely high enough for v19. Biggest value I saw was around 25 alignments for a single guide.
-    threads: 8
+    threads: 32
     conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
     shell:
         """
@@ -792,8 +792,6 @@ rule hisat2_align_to_genome:
         -p {threads} \
         -k {params.max_multihits} \
         --no-softclip \
-        --seed-len 16 \
-        --min-seed-len 12 \
         --mp 6,2 \
         --sp 3,1
         """
