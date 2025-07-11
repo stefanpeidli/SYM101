@@ -1,7 +1,7 @@
 """
 Author: Stefan Peidli
 Title: Snakemake workflow for SYMPHONY experiment SYM101.
-Last Updated: 12.11.2024
+Last Updated: 11.07.2025
 Run: snakemake
 Create DAG: snakemake --forceall --dag | dot -Tpdf > ../results/pipeline/snake_dag.pdf
 Create Rulegraph: snakemake --forceall --rulegraph | dot -Tpdf > ../results/pipeline/snake_rulegraph.pdf
@@ -18,13 +18,6 @@ Description:
         - Runs MAGeCK
         - Runs BAGEL2
         - Runs Gscreend
-        - Time series clustering
-        # TODO: error in mageck filter guides!
-    - Align Guides and Check Copy Number effect
-        - Run cas-offinder to find off-targets
-        - Align the guides to the genome with HISAT2
-        - Run CRISPRcleanR to detect CNEs
-    TODO: check if for all plots I have source data exported
     All user configuration is done in the configuration/config.yaml file.
 """
 
@@ -49,61 +42,43 @@ cell_line_dict = config['cell_lines']
 cell_lines = list(cell_line_dict.values())
 ena_sample_mapping = pd.read_csv("../resources/ENA/ENA_samples_PRJEB82598.tsv", index_col=15, sep='\t')
 sample_long_to_short = {x: x.split('_')[0] for x in sample_names} # long name includes _SXX sample number suffix
-# print(ena_sample_mapping.head())
-# print("sym-02-03-TP1" in ena_sample_mapping.index)
-# print(ena_sample_mapping.index.unique())
-# TODO: WARNING, there are samples missing on ENA. Will have to append them.
 
 ### Define Outputs of this Workflow ###
 rule all:
     input:
         # Read processing and quantification
+        ## QC
         "../results/multiqc/multiqc.html",
         "../results/trimming/trimmed_summary.csv",
+        ## Counts
         TEMPDIR / 'SYM101_counts.csv',
         TEMPDIR / 'SYM101_counts_filtered.csv',  # removed "bad" guides identified with MAGeCK
         TEMPDIR / 'SYM101_counts_corrected.csv',  # corrected sample swap
 
         # Statistical Analysis
-        # ## MAGeCK test
-        # expand('../results/mageck/summaries/{line}/{feature}_SYM101_{counts}_mageck.sgrna_summary.txt', 
-        #     line=['alllines', 'H1975', 'H1299', 'A549'], counts=['counts', 'counts_filtered'], feature=['gene', 'transcript']),
-        # '../results/mageck/SYM101_mageck_filtered_guides_v2.tsv'
-        # ## MAGeCK MLE
-        # expand('../results/mageck/summaries/{feature}_{time_key}_SYM101_{counts}_mageck_mle.sgrna_summary.txt', 
-        #     feature=['gene', 'transcript'], time_key=['alltimes', 'TP1', 'TP2', 'TP3', 'TP4', 'TP5','TP6'], counts=['counts', 'counts_filtered']),
-        # ## BAGEL2
-        # expand('../results/bagel2/SYM101_{counts}_bagel_pr_gene.tsv', counts=['counts', 'counts_filtered']),
-        # ## Gscreend
-        # expand('../results/gscreend/{feature}_SYM101_{counts}_{cell_line}_gscreend_results.tsv',
-        #        feature=['gene', 'transcript'], counts=['counts', 'counts_filtered'], cell_line=cell_lines),
-
-        # ## Timeseries clustering TODO: make script? currently jnb
-        #TODO: add environment
-        # expand('../results/timecourse/timecourse_clusters_{cell_line}.csv', cell_line=cell_lines),
-
-        # Align Guides and Check Copy Number effect
-        # "../results/tables/cas_off_finder.txt",
-        TEMPDIR / 'hisat2/guides_aligned_v48_genome_spliceaware.sam',
-        # expand('../results/mutations/{cell_line}_Sanger_wes_mutations.vcf', cell_line=cell_lines),
-        
-        
-
-# rule download_fastq_ena:
-#     # TODO: SAMPLES MISSING!
-#     output:
-#         TEMPDIR / 'fastq/{sample}_L00{i}_R1_001.fastq'
-#     params:
-#         accession=lambda wildcards: ena_sample_mapping.loc[sample_long_to_short[wildcards.sample], 'run_accession'],
-#         short_name=lambda wildcards: sample_long_to_short[wildcards.sample],
-#     shell:
-#         """
-#         wget ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR139/{params.accession}/{params.short_name}_L00{i}_R1_001.fastq.gz -O {output}
-#         """
-
+        ## MAGeCK test
+        expand('../results/mageck/summaries/{line}/{feature}_SYM101_{counts}_mageck.sgrna_summary.txt', 
+               line=['alllines', 'H1975', 'H1299', 'A549'], 
+               counts=['counts', 'counts_filtered'], 
+               feature=['gene', 'transcript']),
+        '../results/mageck/SYM101_mageck_filtered_guides_v2.tsv'
+        ## MAGeCK MLE
+        expand('../results/mageck/summaries/{feature}_{time_key}_SYM101_{counts}_mageck_mle.sgrna_summary.txt', 
+               feature=['gene', 'transcript'], 
+               time_key=['alltimes', 'TP1', 'TP2', 'TP3', 'TP4', 'TP5','TP6'], 
+               counts=['counts', 'counts_filtered']),
+        ## BAGEL2
+        expand('../results/bagel2/SYM101_{counts}_bagel_pr_gene.tsv', 
+               counts=['counts', 'counts_filtered']),
+        ## Gscreend
+        expand('../results/gscreend/{feature}_SYM101_{counts}_{cell_line}_gscreend_results.tsv',
+               feature=['gene', 'transcript'], 
+               counts=['counts', 'counts_filtered'], 
+               cell_line=cell_lines),
 
 ### Read processing and quantification ###
 rule fastqc:
+    # Produces FastQC reports for the raw FASTQ files.
     input:
         TEMPDIR / 'fastq/{sample}_L00{i}_R1_001.fastq'
     output:
@@ -118,6 +93,7 @@ rule fastqc:
         "v3.3.5/bio/fastqc"
 
 rule multiqc:
+    # Produces a MultiQC report from the FastQC reports and samtools stats.
     input:
         fastqc=expand(TEMPDIR / "fastqc/{sample}_L00{i}.html", sample=sample_names, i=[1,2]),
         samtools=expand(TEMPDIR / "hisat2/{sample}_L00{i}_R1_001_custom_trimmed_stats.txt", sample=sample_names, i=[1,2]),
@@ -132,6 +108,7 @@ rule multiqc:
         "v3.3.5/bio/multiqc"
 
 rule custom_trimming:
+    # Since our primers are variable in length, we use a custom script to trim the FASTQ files.
     input:
         TEMPDIR / 'fastq/{sample}_L00{i}_R1_001.fastq'
     output:
@@ -147,7 +124,7 @@ rule custom_trimming:
         disk_mb=16000,
         time='12:00:00',
     threads: 8
-    conda: 'trimming_env'  # "../environments/trimming_env.yaml"
+    conda: "../environments/trimming_env.yaml"
     shell:
         """
         mkdir -p {TEMPDIR}/trimmed/qc
@@ -160,6 +137,7 @@ rule custom_trimming:
         """
 
 rule custom_trimming_summary:
+    # Summarizes the results of the custom trimming.
     input:
         expand(TEMPDIR / 'trimmed/qc/{sample}_L00{i}_R1_001_custom_trimmed_qc.csv', sample=sample_names, i=[1,2])
     output:
@@ -201,6 +179,7 @@ rule custom_trimming_summary:
         pl.close()
 
 rule guide_to_fasta:
+    # Converts the guide sequences to FASTA format for alignment with HISAT2.
     input:
         '../resources/all_gRNA_data.csv'
     output:
@@ -216,18 +195,20 @@ rule guide_to_fasta:
         print('Done!')
 
 rule hisat2_guide_index:
+    # Builds the HISAT2 index for the guide sequences.
     input:
         '../resources/SYM101_guides.fa'
     output:
         expand(TEMPDIR / 'hisat2/index.{i}.ht2', i=range(1,9))
     threads: 8
-    conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
+    conda: "../environments/hisat2_env.yaml"
     shell:
         """
         hisat2-build -p {threads} {input} {TEMPDIR}/hisat2/index
         """
 
 rule hisat2_align:
+    # Aligns the trimmed FASTQ files to the guides using HISAT2. (Looking back, bowtie2 would have been a better choice)
     input:
         trimmed_fastq=TEMPDIR / 'trimmed/{sample}_L00{i}_R1_001_custom_trimmed.fastq',
         index=expand(TEMPDIR / 'hisat2/index.{i}.ht2', i=range(1,9))
@@ -238,7 +219,7 @@ rule hisat2_align:
         mem_mb=32000,
         disk_mb=32000
     threads: 8
-    conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
+    conda: "../environments/hisat2_env.yaml"
     shell:
         """
         hisat2 \
@@ -249,6 +230,7 @@ rule hisat2_align:
         """
 
 rule samtools_stats:
+    # Generates statistics from the SAM files using samtools.
     input:
         sam=TEMPDIR / 'hisat2/{sample}_L00{i}_R1_001_custom_trimmed.sam'
     output:
@@ -258,13 +240,14 @@ rule samtools_stats:
         mem_mb=16000,
         disk_mb=16000
     threads: 8
-    conda: "samtools_env"  # "../environments/samtools_env.yaml"
+    conda: "../environments/samtools_env.yaml"
     shell:
         """
         samtools stats -@ {threads} {input.sam} > {output.stats}
         """
 
 rule count:
+    # Read quantification using samtools.
     input:
         sam=TEMPDIR / 'hisat2/{sample}_L00{i}_R1_001_custom_trimmed.sam'
     output:
@@ -274,11 +257,12 @@ rule count:
         mem_mb=16000,
         disk_mb=16000
     threads: 4
-    conda: "samtools_env"  # "../environments/samtools_env.yaml"
+    conda: "../environments/samtools_env.yaml"
     script:
         "scripts/snake_count_reads.sh"
 
 rule merge_counts:
+    # Merges the counts from all samples into a single table.
     input:
         counts=expand(TEMPDIR / 'counts/{sample}_L00{i}_counts.txt', sample=sample_names, i=[1,2]),
         guide_df='../resources/all_gRNA_data.csv'
@@ -300,6 +284,7 @@ rule merge_counts:
         df.to_csv(output[0])
 
 rule correct_sample_swap:
+    # Corrects the sample swap that occurred during the experiment. (sym-01-01-TP6 and sym-01-02-TP6 were swapped across replicates 1 and 2)
     input:
         TEMPDIR / 'SYM101_counts.csv'
     output:
@@ -312,6 +297,7 @@ rule correct_sample_swap:
 
 ### Statistical Analysis ###
 rule mageck_define_controls:
+    # Defines the control guides for MAGeCK analysis.
     input:
         counts=TEMPDIR / 'SYM101_{counts}.csv'
     output:
@@ -323,6 +309,7 @@ rule mageck_define_controls:
             file.write('\n'.join([x for x in df.index if 'control' in x.lower()]))
 
 rule mageck_test_prepare_inputs:
+    # Prepares the input files for MAGeCK test.
     input:
         counts=TEMPDIR / 'SYM101_{counts}.csv'
     output:
@@ -367,6 +354,7 @@ rule mageck_test_prepare_inputs:
             file.write(day0)
 
 rule mageck_test:
+    # Runs MAGeCK test on the prepared input files.
     input:
     # I should run this per cell line I guess and only use TP6
         counts=TEMPDIR / 'mageck/{line}/{feature}_SYM101_{counts}.tsv',
@@ -374,7 +362,7 @@ rule mageck_test:
         day0=TEMPDIR / 'mageck/{line}/SYM101_{counts}_day0_samples.txt',
     output:
         '../results/mageck/summaries/{line}/{feature}_SYM101_{counts}_mageck.sgrna_summary.txt'
-    conda: "mageck_env"  # "../environments/mageck_env.yaml"
+    conda: "../environments/mageck_env.yaml"
     shell:
         """
         mkdir -p $(dirname {output})
@@ -390,6 +378,7 @@ rule mageck_test:
         """
 
 rule mageck_mle_prepare_counts:
+    # Prepares the counts for MAGeCK MLE module.
     input:
         counts=TEMPDIR / 'SYM101_{counts}.csv'
     output:
@@ -419,6 +408,7 @@ rule mageck_mle_prepare_counts:
         sdf.to_csv(output.counts_prepared)
 
 rule mageck_mle_prepare_designs:
+    # Prepares the design matrix for MAGeCK MLE module.
     input:
         counts=TEMPDIR / 'SYM101_counts.csv'
     output:
@@ -470,6 +460,7 @@ rule mageck_mle_prepare_designs:
         design_mat.to_csv(output.design_matrix, sep='\t')
 
 rule mageck_mle:
+    # Runs MAGeCK MLE on the prepared input files.
     input:
         counts_prepared=TEMPDIR / 'mageck/mageck_mle_{counts}_{time_key}_{feature}.csv',
         design_matrix=TEMPDIR / 'mageck/mageck_mle_designmat_{time_key}.txt',
@@ -484,7 +475,7 @@ rule mageck_mle:
         time='23:00:00',
         mem_mb=64000,
         disk_mb=64000
-    conda: "mageck_env"  # "../environments/mageck_env.yaml"
+    conda: "../environments/mageck_env.yaml"
     threads: 16
     shell:
         """
@@ -515,6 +506,7 @@ rule mageck_filter_guides:
         'scripts/snake_mageck_filter_guides.py'
 
 rule bagel2_prepare:
+    # Prepares the input files for BAGEL2.
     input:
         counts=TEMPDIR / 'SYM101_{counts}.csv'
     output:
@@ -566,6 +558,7 @@ rule bagel2_prepare:
         sdf.to_csv(output.counts, sep='\t')
 
 rule install_BAGEL_git:
+    # Installs BAGEL2 from the git repository.
     output:
         bagel_py=TEMPDIR / "bagel_software/BAGEL.py",
         bagel_dir=directory(TEMPDIR / "bagel_software")
@@ -576,6 +569,7 @@ rule install_BAGEL_git:
         """
 
 rule bagel2_fc:
+    # Calculates fold changes for BAGEL2.
     input:
         bagel_py=TEMPDIR / "bagel_software/BAGEL.py",
         bagel_counts=TEMPDIR / 'bagel2/SYM101_{counts}_bagel2_input_{index}.txt'
@@ -591,6 +585,7 @@ rule bagel2_fc:
         """
 
 rule bagel2_bf:
+    # Calculates Bayes Factors for BAGEL2.
     input:
         bagel_py=TEMPDIR / "bagel_software/BAGEL.py",
         fc=TEMPDIR / 'bagel2/SYM101_{counts}_bagel_{index}.foldchange',
@@ -614,6 +609,7 @@ rule bagel2_bf:
         """
 
 rule bagel2_pr:
+    # Calculates Precision-Recall for BAGEL2.
     input:
         bagel_py=TEMPDIR / "bagel_software/BAGEL.py",
         bf='../results/bagel2/SYM101_{counts}_bagel_bf_{index}.tsv',
@@ -630,6 +626,7 @@ rule bagel2_pr:
         """
 
 rule bagel2_merge:
+    # Merges the BAGEL2 results from all cell lines and time points.
     input:
         pr=expand('../results/bagel2/SYM101_{{counts}}_bagel_pr_gene_{time}_{line}.tsv', time=['alltimes', 'TP5TP6'], line=['alllines', 'H1975', 'H1299', 'A549'])
     output:
@@ -649,203 +646,14 @@ rule bagel2_merge:
         # write to file
         df.to_csv(output[0], sep='\t')
 
-rule timecourse_clustering:
-    input:
-        counts=TEMPDIR / 'SYM101_counts_filtered.csv'
-    output:
-        '../results/timecourse/time_series_cluster_profiles_{cell_line}.pdf',
-        '../results/timecourse/time_series_cluster_bestprofiles_{cell_line}.pdf',
-        '../results/timecourse/timecourse_clusters_{cell_line}.csv'
-    log:
-        notebook="logs/notebooks/snake_timecourse_processed_{cell_line}.ipynb"
-    notebook:
-        "scripts/snake_timecourse.py.ipynb"
-
 rule gscreend:
+    # Runs Gscreend on the prepared input files.
     input:
         counts=TEMPDIR / 'SYM101_{counts}.csv'
     output:
         '../results/gscreend/{feature}_SYM101_{counts}_{cell_line}_gscreend_results.tsv'
-    conda: "gscreend_env"  # "../environments/gscreend_env.yaml"
+    conda: "../environments/gscreend_env.yaml"
     wildcard_constraints:
         counts="counts|counts_filtered"
     script:
         "scripts/snake_gscreend.R"
-
-### Align Guides and Check Copy Number effect ###
-# TODO: not sure if this is applicable to Cas13
-# rule cas_off_finder:
-#     input:
-#         "../resources/guide_list_casoffinder.txt"
-#     output:
-#         "../results/tables/cas_off_finder.txt"
-#     resources:
-#         time='24:00:00',
-#         mem_mb=64000,
-#         disk_mb=64000
-#     conda:
-#         "offtarget_env"
-#     shell:
-#         """
-#         cas-offinder {input} C {output}
-#         """
-
-rule get_reference_fasta:
-    output:
-        TEMPDIR / 'hisat2/GRCh38.primary_assembly.genome.fa'
-    wildcard_constraints:
-        version="48"  # TODO: this does not work for v19, is GRCh37
-    shell:
-        """
-        cd {TEMPDIR}/hisat2/
-        wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{wildcards.version}/GRCh38.primary_assembly.genome.fa.gz
-        gunzip GRCh38.primary_assembly.genome.fa.gz
-        """
-
-rule get_reference_gtf:
-    output:
-        TEMPDIR / 'hisat2/gencode.v{version}.annotation.gtf'
-    shell:
-        """
-        cd {TEMPDIR}/hisat2/
-        wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_{wildcards.version}/gencode.v{wildcards.version}.annotation.gtf.gz
-        gunzip gencode.v{wildcards.version}.annotation.gtf.gz
-        """
-
-rule extract_splice_sites:
-    input:
-        gtf=TEMPDIR / 'hisat2/gencode.v{version}.annotation.gtf'
-    output:
-        txt=TEMPDIR / 'hisat2/splicesites_v{version}.txt'
-    resources:
-        time='24:00:00',
-        mem_mb=64000,
-        disk_mb=64000
-    threads: 8
-    conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
-    shell:
-        """
-        hisat2_extract_splice_sites.py {input.gtf} > {output.txt}
-        """
-
-rule extract_exons:
-    input:
-        gtf=TEMPDIR / 'hisat2/gencode.v{version}.annotation.gtf'
-    output:
-        txt=TEMPDIR / 'hisat2/exons_v{version}.txt'
-    resources:
-        time='24:00:00',
-        mem_mb=64000,
-        disk_mb=64000
-    threads: 8
-    conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
-    shell:
-        """
-        hisat2_extract_exons.py {input.gtf} > {output.txt}
-        """
-
-rule hisat2_index:
-    input:
-        fasta=TEMPDIR / 'hisat2/GRCh38.primary_assembly.genome.fa',
-        splicesites=TEMPDIR / 'hisat2/splicesites_v{version}.txt',
-        exons=TEMPDIR / 'hisat2/exons_v{version}.txt'
-    output:
-        expand(TEMPDIR / 'hisat2/grch38_gencode_v{{version}}_splice_index.{i}.ht2', i=range(1,9))
-    resources:
-        time='24:00:00',
-        mem_mb=200000,
-        disk_mb=200000
-    threads: 16
-    conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
-    shell:
-        """
-        cd {TEMPDIR}/hisat2/
-        hisat2-build \
-            -p {threads} \
-            --ss {input.splicesites} \
-            --exon {input.exons} \
-            {input.fasta} \
-            grch38_gencode_v{wildcards.version}_splice_index
-        """
-
-rule hisat2_align_to_genome:
-    input:
-        guide_fasta='../resources/SYM101_guides.fa',
-        index=expand(TEMPDIR / 'hisat2/grch38_gencode_v{{version}}_splice_index.{i}.ht2', i=range(1,9))
-    output:
-        sam=TEMPDIR / 'hisat2/guides_aligned_v{version}_genome_spliceaware.sam'
-    resources:
-        time='24:00:00',
-        mem_mb=200000,
-        disk_mb=200000
-    params:
-        max_multihits=50  # definitely high enough for v19. Biggest value I saw was around 25 alignments for a single guide.
-    threads: 32
-    conda: "hisat2_env"  # "../environments/hisat2_env.yaml"
-    shell:
-        """
-        # Params optimized for small reads and splice-aware alignment
-        hisat2 -f \
-        -x {TEMPDIR}/hisat2/grch38_gencode_v{wildcards.version}_splice_index \
-        -U {input.guide_fasta} \
-        -S {output.sam} \
-        -p {threads} \
-        -k {params.max_multihits} \
-        --no-softclip \
-        --mp 6,2 \
-        --sp 3,1
-        """
-
-# TODO: review this rule
-# rule annotate_exon_number:
-#     input:
-#         sam=TEMPDIR / 'hisat2/guides_aligned_{version_and_feature}.sam',
-#         gtf='/g/huber/users/peidli/utils/genomes/homo_sapiens/Homo_sapiens.GRCh38.111.gtf'  #TODO: Question do I need to adapt to reference?
-#     output:
-#         annotated_csv=TEMPDIR / 'hisat2/guides_aligned_{version_and_feature}_annotated.csv',
-#         series=TEMPDIR / 'hisat2/exon_numbers_{version_and_feature}.csv'
-#     wildcard_constraints:
-#         version_and_feature="v45_transcriptome|v19_transcriptome"
-#     resources:
-#         time='10:00:00',
-#         mem_mb=64000,
-#         disk_mb=64000
-#     shell:
-#         """
-#         python scripts/annotate_exon_number.py \
-#             -i {input.sam} \
-#             -g {input.gtf} \
-#             -o {output.annotated_csv} \
-#             -x {output.series}
-#         """
-
-### Check if there are mutations in the guide target regions ###
-rule retrieve_snps:
-    # NOTE: wget and curl fail here. Solved this by manual download with browser.
-    output:
-        TEMPDIR / 'mutations/{cell_line}_Sanger_wes_snp_vaf.caveman_c.annot_drv.vcf.gz'
-    params:
-        SIDM=lambda wildcards: config['Line_to_SIDM'][wildcards.cell_line]  # get SIDM from config
-    shell:
-        "wget https://cog.sanger.ac.uk/cmp/data/{params.SIDM}_Sanger_wes_snp_vaf.caveman_c.annot_drv.vcf.gz -O {output}"
-
-rule retrieve_indels:
-    # NOTE: wget and curl fail here. Solved this by manual download with browser.
-    output:
-        TEMPDIR / 'mutations/{cell_line}_Sanger_wes_indel_vaf.caveman_c.annot_drv.vcf.gz'
-    params:
-        SIDM=lambda wildcards: config['Line_to_SIDM'][wildcards.cell_line]  # get SIDM from config
-    shell:
-        "wget https://cog.sanger.ac.uk/cmp/data/{params.SIDM}_Sanger_wes_indel_vaf.pindel.annot_drv.vcf.gz -O {output}"
-
-rule merge_mutations:
-    input:
-        snps=TEMPDIR / 'mutations/{cell_line}_Sanger_wes_snp_vaf.caveman_c.annot_drv.vcf.gz',
-        indels=TEMPDIR / 'mutations/{cell_line}_Sanger_wes_indel_vaf.caveman_c.annot_drv.vcf.gz',
-    output:
-        '../results/mutations/{cell_line}_Sanger_wes_mutations.vcf'
-    shell:
-        "bcftools merge {input.snps} {input.indels} -o {output}"
-
-onsuccess: 
-    print("Snakemake is done!")
