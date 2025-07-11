@@ -4,4 +4,4 @@ channels:
  - bioconda
 
 dependencies:
-  - bioconda::cutadapt
+  - bioconda::cutadapt=5.1

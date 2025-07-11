@@ -6,7 +6,7 @@ channels:
 
 dependencies:
   - python=3
-  - conda-forge::r-base
+  - conda-forge::r-base=4.3.2
   - conda-forge::r-irkernel
   - conda-forge::r-optparse
   - conda-forge::jupyter

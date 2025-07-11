@@ -9,7 +9,7 @@ dependencies:
   - numpy
   - matplotlib
   - pandas
-  - bioconda::cas-offinder
+  - bioconda::cas-offinder=2.4
   - conda-forge::scikit-learn
   - pip:
      - xgboost==1.7.3

@@ -6,9 +6,9 @@ channels:
 
 dependencies:
   - python>=3
-  - numpy
+  - numpy=1.26.4
   - matplotlib
-  - pandas
-  - scipy
+  - pandas=2.2.0
+  - scipy=1.12.0
   - tqdm
-  - conda-forge::scikit-learn
+  - conda-forge::scikit-learn=1.4.0
