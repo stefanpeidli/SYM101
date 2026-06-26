@@ -1,0 +1,75 @@
+[workspace]
+authors = ["jb63 <jb63@sanger.ac.uk>"]
+channels = ["conda-forge", "bioconda"]
+name = "SYM101"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+# This is the "launcher" environment. It provides Snakemake plus a conda
+# frontend (mamba). The pipeline itself still uses Snakemake's per-rule
+# `conda:` directives (environments/*.yaml), built on demand via --use-conda.
+# The snake_env.yaml contents are mirrored here because the Snakefile imports
+# pandas and reads CSVs at parse time, before any rule env is activated.
+[dependencies]
+python = "3.11.*"
+snakemake-minimal = ">=8"
+snakemake-wrapper-utils = "*"
+conda = "*"
+tqdm = "4.66.1.*"
+numpy = "1.26.4.*"
+pandas = "1.5.3.*"
+seaborn = "0.11.2.*"
+matplotlib = "*"
+nbformat = "5.0.8.*"
+jupyter = "*"
+ipykernel = "*"
+nbconvert = "*"
+
+# Environment for the analysis notebooks (notebooks/*.ipynb), mirroring
+# environments/sym101py_env.yaml. 8 of 9 notebooks declare the sym101py_env
+# kernel; the 9th (SYM101_table_merging) wants an "sc_env" that has no yaml in
+# this repo and is not reproducible here.
+[feature.sym101py.dependencies]
+python = "3.11.*"
+tqdm = "*"
+numpy = "1.26.4.*"  # fastcluster needs numpy < 2
+pandas = "2.2.3.*"
+scipy = "*"
+seaborn = "0.13.2.*"
+matplotlib = "*"
+nbformat = "5.0.*"  # >5.1 causes issues with jupyter ("id" tag)
+jupyter = "*"
+jupyterlab = "*"
+ipykernel = "*"
+nbconvert = "*"
+mscorefonts = "*"
+pyyaml = "*"
+fastcluster = "*"
+scikit-learn = "*"
+openpyxl = "*"
+adjusttext = "*"
+statannotations = "*"
+pysam = "0.23.3.*"
+pyranges = "0.1.4.*"
+
+[feature.sym101py.pypi-dependencies]
+PyComplexHeatmap = "==1.6.6"
+
+[feature.sym101py.tasks]
+# Launch JupyterLab in the notebooks/ directory using this environment.
+lab = { cmd = "jupyter lab", cwd = "notebooks" }
+
+[environments]
+# Kept separate from the default launcher env (they have conflicting pins),
+# so exclude the default feature.
+sym101py = { features = ["sym101py"], no-default-feature = true }
+
+[tasks]
+# Run the full pipeline. Set TEMPDIR in configuration/config.yaml first.
+pipeline = { cmd = "snakemake --use-conda --cores all", cwd = "snakemake" }
+# Dry run to preview the DAG of jobs without executing anything.
+dryrun = { cmd = "snakemake --use-conda -n", cwd = "snakemake" }
+# Pre-build all per-rule conda envs without running the pipeline.
+conda-create = { cmd = "snakemake --use-conda --conda-create-envs-only --cores all", cwd = "snakemake" }
+# Render the rule graph to a PDF.
+dag = { cmd = "snakemake --forceall --dag | dot -Tpdf > ../results/pipeline/snake_dag.pdf", cwd = "snakemake" }
