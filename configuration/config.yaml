@@ -1,5 +1,5 @@
 # File paths, please adapt to your local setup
-TEMPDIR: "/scratch/peidli/SYMPHONY/SYM101/"  # place to store temporary files (lots of data)
+TEMPDIR: "/home/ubuntu/projects/SYM101"
 
 # Configuration for SYMPHONY Screen SYM101, no need to change these unless you know what you're doing
 guide_length: 23
